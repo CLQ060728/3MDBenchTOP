@@ -4,7 +4,7 @@ import os, json
 
 if __name__ == "__main__":
     path_root = "/home/jovyan/3MDBench/data/IMAGEs/MSCOCO/"
-    dict_file_path = os.path.join(path_root, "sel_captions_5000.txt")
+    dict_file_path = os.path.join(path_root, "sel_captions_10000.txt")
     with open(dict_file_path, "r") as dict_file:
         selected_img_cap_dict = json.load(dict_file)
 
@@ -14,8 +14,8 @@ if __name__ == "__main__":
     try:
         raw_img_caption_dict = dict()
         para_img_caption_dict = dict()
-        raw_out_file_path = os.path.join(path_root, "generated", "raw_img_caption_5000.txt")
-        para_out_file_path = os.path.join(path_root, "generated", "para_img_caption_5000.txt")
+        raw_out_file_path = os.path.join(path_root, "generated", "raw_img_caption_10000.txt")
+        para_out_file_path = os.path.join(path_root, "generated", "para_img_caption_10000.txt")
         with open(raw_out_file_path, "a") as raw_out_file, open(para_out_file_path, "a") as para_out_file:
             model_id = "/home/jovyan/llama3/Meta-Llama-3-8B-Instruct"
             counter = 1

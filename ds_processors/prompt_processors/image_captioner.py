@@ -52,9 +52,10 @@ def get_image_captions(tokenizer, model, input_ids, image_processor, img_paths, 
     for img_path in img_paths:
         image = Image.open(img_path)
         image_tensor = process_images([image], image_processor, model.config)
-        image_tensor = [_image.to(dtype=torch.float16, device=device) for _image in image_tensor]
+        image_tensor = [_image.to(dtype=torch.bfloat16, device=device) for _image in image_tensor]
         image_sizes = [image.size]
-        
+
+        model = model.bfloat16()
         cont = model.generate(
             input_ids,
             images=image_tensor,
