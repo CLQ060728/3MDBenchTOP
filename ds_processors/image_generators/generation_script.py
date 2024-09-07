@@ -25,10 +25,10 @@ from image_generators.PixArt_Σ import generator as pixgen
 from image_generators.StableDiffusion3 import generator as sd3gen
 from image_generators.DeepFloydIF import generator as dfgen
 from image_generators.StableDiffusionXL import generator as sdxlgen
-import logging
-logger = logging.getLogger("GENERATION_SCRIPT")
+# import logging
+# logger = logging.getLogger("GENERATION_SCRIPT")
 
-logging.basicConfig(filename='/home/jovyan/3MDBench/ds_processors/image_generators/out2.log', level=logging.INFO)
+# logging.basicConfig(filename='/home/jovyan/3MDBench/ds_processors/image_generators/out2.log', level=logging.INFO)
 
 def load_img_captions_dict(img_cap_file_path):
     json_string = ""
@@ -152,7 +152,7 @@ def generate_imgs_in_batch(model_name, prompt_type, pipe, num_inference_steps, i
             prompts = img_prompt_caps
         else:
             prompts = None
-            logger.error(f"prompts can not be captioner prompts when model is IF, SDXL or SD3!")
+            print(f"prompts can not be captioner prompts when model is IF, SDXL or SD3!")
             return
         
         img_file_name = img_cap_dict[img_id][0]
@@ -181,14 +181,14 @@ def generate_imgs_in_batch(model_name, prompt_type, pipe, num_inference_steps, i
                                               manual_seed=manual_seed, seed=seed)
         
         real_img_tensor = convert_img_to_imgtensor(real_img_path, None, size)
-        logger.info(f"real_img_tensor size: {real_img_tensor.size()}")
+        print(f"real_img_tensor size: {real_img_tensor.size()}")
         similarities = torch.tensor([], dtype=torch.float32, device=device)
         for fake_img in images:
             if model_name == "DeepFloydIF":
                 fake_img_tensor = convert_img_to_imgtensor(None, fake_img[1], size)
             else:
                 fake_img_tensor = convert_img_to_imgtensor(None, fake_img, size)
-            logger.info(f"fake_img_tensor size: {fake_img_tensor.size()}")
+            print(f"fake_img_tensor size: {fake_img_tensor.size()}")
             if real_img_tensor.size(dim=1) > fake_img_tensor.size(dim=1):
                 fake_img_tensor = torch.repeat_interleave(fake_img_tensor, real_img_tensor.size(dim=1), dim=1)
             elif real_img_tensor.size(dim=1) < fake_img_tensor.size(dim=1):

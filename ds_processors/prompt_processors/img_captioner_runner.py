@@ -1,8 +1,8 @@
 # run image captioner in batch
 # Author: Qian Liu
 
-import builtins
-builtins.LLAVA_PATH_ = "/home/jovyan/3MDBench/ds_processors/prompt_processors/LLaVA_NeXT/"
+# import builtins
+# builtins.LLAVA_PATH_ = "/home/jovyan/3MDBench/ds_processors/prompt_processors/LLaVA_NeXT/"
 import image_captioner as ic
 import os, json
 import torch
@@ -50,7 +50,7 @@ def convert_captioner_img_caption_files(captioner_img_cap_path_root, captioner_i
         json.dump(captioner_img_caption_dict, captioner_img_caption_file, indent=4)
 
 
-def generate_img_cap_captions(max_bound, last_bound, path_root, device):
+def generate_img_cap_captions(max_bound, previous_bound, path_root, device):
     dict_file_path = os.path.join(path_root, f"sel_captions_{max_bound}.txt")
     img_cap_dict_file_path = os.path.join(path_root, "image_caption_dict.txt")
     
@@ -65,8 +65,7 @@ def generate_img_cap_captions(max_bound, last_bound, path_root, device):
             img_path = os.path.join(sel_path, img_cap_dict[img_id][0])
             img_paths.append(img_path)
 
-    # for file_count in range(1, 6, 1):
-    for file_count in range(6, 11, 1):
+    for file_count in range(1, 11, 1):
         out_file_path = os.path.join(path_root, "generated", f"captioner_img_caption_{max_bound}_{file_count}.txt")
         tokenizer = model = input_ids = image_processor = None
         tokenizer, model, input_ids, image_processor = ic.get_llava_next_llama3_8b_model(device)
@@ -75,20 +74,33 @@ def generate_img_cap_captions(max_bound, last_bound, path_root, device):
                 image_captions = ic.get_image_captions(tokenizer, model, input_ids, image_processor,
                                                     img_paths[((counter-1)*1000):(counter*1000)], device)
                 json.dump(image_captions, out_file, indent=4)
-                out_file.write(f"\n counter:[{(last_bound+(counter-1)*1000)}:{(last_bound+counter*1000)}]\n")
-                print(f"counter:[{(last_bound+(counter-1)*1000)}:{(last_bound+counter*1000)}]")  
+                out_file.write(f"\n counter:[{(previous_bound+(counter-1)*1000)}:{(previous_bound+counter*1000)}]\n")
+                print(f"counter:[{(previous_bound+(counter-1)*1000)}:{(previous_bound+counter*1000)}]")  
+
+
+def run(data_root, max_bound, previous_bound, device, aggregate=False):
+    captioner_img_cap_path_root = os.path.join(data_root, "generated")
+    captioner_img_cap_file_prefix = f"captioner_img_caption_{max_bound}"
+    sel_dict_file_path = os.path.join(data_root, f"sel_captions_{max_bound}.txt")
+    if not aggregate:
+        generate_img_cap_captions(max_bound, previous_bound, data_root, device)
+    if aggregate:
+        convert_captioner_img_caption_files(captioner_img_cap_path_root, captioner_img_cap_file_prefix,
+                                            sel_dict_file_path)
 
 
 if __name__ == "__main__":
-    path_root = "/home/jovyan/3MDBench/data/IMAGEs/MSCOCO/"
-    captioner_img_cap_path_root = os.path.join(path_root, "generated")
+    data_root = "/home/jovyan/3MDBench/data/IMAGEs/MSCOCO/"
+    # captioner_img_cap_path_root = os.path.join(path_root, "generated")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     max_bound = 15000
-    last_bound = 10000
-    captioner_img_cap_file_prefix = f"captioner_img_caption_{max_bound}"
-    sel_dict_file_path = os.path.join(path_root, f"sel_captions_{max_bound}.txt")
+    previous_bound = 10000
+    aggregate = False
+    run(data_root, max_bound, previous_bound, aggregate, device)
+    # captioner_img_cap_file_prefix = f"captioner_img_caption_{max_bound}"
+    # sel_dict_file_path = os.path.join(path_root, f"sel_captions_{max_bound}.txt")
     
-    generate_img_cap_captions(max_bound, last_bound, path_root, device)
+    # generate_img_cap_captions(max_bound, last_bound, path_root, device)
     
     # convert_captioner_img_caption_files(captioner_img_cap_path_root, captioner_img_cap_file_prefix, sel_dict_file_path)
     
