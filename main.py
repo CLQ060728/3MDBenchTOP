@@ -159,4 +159,4 @@ def main(args_main):
 if __name__ == '__main__':
     parser_main = argparse.ArgumentParser('3MDBench_main', parents=[get_args_parser()])
     args_main = parser_main.parse_args()
-    
+    main(args_main)
