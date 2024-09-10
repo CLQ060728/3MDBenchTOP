@@ -11,7 +11,7 @@ def get_args_parser():
                 + """'IMG_GENERATION', 'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'.""")
     parser.add_argument('--project_root', default="./", type=str, required=True,
                         help="""Specify the root directory for 3MDBench project.""")
-    parser.add_argument('--gpu_id', default=0, type=int, required=True, help="""Specify the gpu id.""")
+    parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
     parser.add_argument('--dataset_name', default="MSCOCO", type=str, 
                         help="""Specify dataset name.""")
     
@@ -46,9 +46,11 @@ def get_args_parser():
            help="""Profiling based on full images/frames bands.""")
     parser.add_argument('--real_or_fake', default=False, type=bool, 
            help="""Profiling based on real or fake images/frames.""")
-    parser.add_argument('--amount', default=80000, type=int, 
+    parser.add_argument('--total_amount', default=80000, type=int, 
                         help="""Specify the total amount of profiling image/video files.""")
-    parser.add_argument('--output_path', default="", type=str,
+    parser.add_argument('--task_amount', default=1000, type=int, 
+                        help="""Specify the amount of profiling image/video files per task.""")
+    parser.add_argument('--output_path', default="./", type=str,
                         help="""Specify the output path for profilings.""")
     # parser.add_argument('--tau', default=0.996, type=float, help="""BYOL moving average parameter.""")
     # parser.add_argument('--out_sizes', nargs='+', type=int, 
@@ -86,14 +88,14 @@ def main(args_main):
         ds_paths = [f"{args_main.real_path},REAL", f"{args_main.fake_path}, FAKE"]
         out_path = os.path.join(args_main.output_path, profiler_name)
         os.makedirs(out_path, exist_ok = True)
-        ads.compute_dct(args_main.amount, size, ds_paths, args_main.colour_gray, 
+        ads.compute_dct(args_main.total_amount, size, ds_paths, args_main.colour_gray, 
                         args_main.dataset_name, args_main.gen_model, out_path)
     elif args_main.functionality == "DFT":
         import ds_profiling.avg_dft_spectrum as ads
         size = (512, 512)
         profiler_name = "DFT"
-        images_real = ads.load_images(args_main.real_path, args_main.amount, size)
-        images_fake = ads.load_images(args_main.fake_path, args_main.amount, size)
+        images_real = ads.load_images(args_main.real_path, args_main.total_amount, args_main.task_amount, size)
+        images_fake = ads.load_images(args_main.fake_path, args_main.total_amount, args_main.task_amount, size)
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name,
                                 args_main.gen_model)
         os.makedirs(out_path, exist_ok = True)
@@ -105,8 +107,8 @@ def main(args_main):
         size = (512, 512)
         fig_size = (20, 4)
         profiler_name = "POWER"
-        images_real = adps.load_images(args_main.real_path, args_main.amount, size)
-        images_fake = adps.load_images(args_main.fake_path, args_main.amount, size)
+        images_real = adps.load_images(args_main.real_path, args_main.total_amount, args_main.task_amount, size)
+        images_fake = adps.load_images(args_main.fake_path, args_main.total_amount, args_main.task_amount, size)
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name,
                                 args_main.gen_model)
         os.makedirs(out_path, exist_ok = True)
@@ -126,22 +128,22 @@ def main(args_main):
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name, 
                                 args_main.gen_model, real_or_fake)
         os.makedirs(output_path, exist_ok = True)
-        idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.amount,
+        idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.total_amount, args_main.task_amount, 
                                    output_path=out_path)
         input_path = args_main.fake_path
         real_or_fake = "fake"
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name, 
                                 args_main.gen_model, real_or_fake)
         os.makedirs(output_path, exist_ok = True)
-        idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.amount,
+        idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.total_amount, args_main.task_amount, 
                                    output_path=out_path)
     elif args_main.functionality == "TEXTURE_DESCRIPTORS":
         import ds_profiling.img_ds_texture_descriptors as idtd
         profiler_name = "TEXTURE_DESCRIPTORS"
         real_descriptors_dict = idtd.get_ds_channels_descriptors(args_main.real_path, 
-                                                                 args_main.amount)
+                                                                 args_main.total_amount, args_main.task_amount)
         fake_descriptors_dict = idtd.get_ds_channels_descriptors(args_main.fake_path, 
-                                                                 args_main.amount)
+                                                                 args_main.total_amount, args_main.task_amount)
         descriptor_names = ["LBP", "CoALBPs", "LPQ"]
         channels = ["Y", "Cr", "Cb", "H", "S", "V"]
         real_generator_name = f"{args_main.dataset_name}_REAL"
