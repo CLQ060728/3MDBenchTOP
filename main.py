@@ -153,10 +153,17 @@ def main(args_main):
         for descriptor_name in descriptor_names:
             for channel in channels:
                 descr_dict_key = f"{channel}_{descriptor_name}"
-                idtd.histogram_full_image_comparison(real_descriptors_dict[descr_dict_key], 
-                                                     fake_descriptors_dict[descr_dict_key], 
-                                                     descriptor_name, real_generator_name, 
-                                                     fake_generator_name, channel, out_path)
+                if descriptor_name == "CoALBPs":
+                    for idx in range(3):
+                        idtd.histogram_full_image_comparison(real_descriptors_dict[descr_dict_key][idx], 
+                                                             fake_descriptors_dict[descr_dict_key][idx], 
+                                                             f"{descriptor_name}_{idx}", real_generator_name, 
+                                                             fake_generator_name, channel, out_path)
+                else:
+                    idtd.histogram_full_image_comparison(real_descriptors_dict[descr_dict_key], 
+                                                         fake_descriptors_dict[descr_dict_key], 
+                                                         descriptor_name, real_generator_name, 
+                                                         fake_generator_name, channel, out_path)
 
 
 if __name__ == '__main__':
