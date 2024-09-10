@@ -8,11 +8,12 @@ from . import generation_script as gs
 
 
 def run(project_root, ds_name, model_name, max_bound, img_width, img_height,
-        prompt_type, device, gpu_id=0, t2i_or_i2i=False, num_inference_steps=50, manual_seed=False, seed=None)
+        prompt_type, device, gpu_id=0, t2i_or_i2i=False, num_inference_steps=50, manual_seed=False, seed=None):
     variant= ""
     img_path_root = os.path.join(project_root, "data/IMAGEs/")
     output_path_root = os.path.join(img_path_root, "generated")
     ds_path = os.path.join(img_path_root, ds_name)
+    code_dir_root = os.path.join(project_root, "ds_processors")
     if model_name == "Kandinsky3":
         variant = "fp16"
         repo_id = "kandinsky-community/kandinsky-3"

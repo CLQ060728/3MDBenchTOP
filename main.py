@@ -30,6 +30,7 @@ def get_args_parser():
                         help="""Specify prompt type, 'raw_prompt', 'para_prompt', 'cap_prompt'.""")
     parser.add_argument('--gen_width', default=512, type=int, help="""The width of the generated images/frames.""")
     parser.add_argument('--gen_height', default=512, type=int, help="""The height of the generated images/frames.""")
+    parser.add_argument('--text2image', default=False, type=bool, help="""Whether to use text prompts to generate images.""")
     parser.add_argument('--manual_seed', default=False, type=bool, help="""Whether to use manual generated random"""
                         + """seed.""")
     parser.add_argument('--seed', default=None, type=int, help="""The manually specified random seed.""")
@@ -75,10 +76,9 @@ def main(args_main):
         builtins.CODE_DIR_ROOT_ = code_dir_root
         import ds_processors.image_generators.img_gen_runner as igr
         device = torch.device(f'cuda:{args_main.gpu_id}' if torch.cuda.is_available() else 'cpu')
-        t2i_or_i2i = True 
         igr.run(args_main.project_root, args_main.dataset_name, args_main.gen_model, args_main.max_bound,
-                args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, gpu_id, 
-                t2i_or_i2i = t2i_or_i2i, manual_seed=args_main.manual_seed, seed=args_main.seed)
+                args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, args_main.gpu_id, 
+                t2i_or_i2i = args_main.text2image, manual_seed=args_main.manual_seed, seed=args_main.seed)
     elif args_main.functionality == "DCT":
         import ds_profiling.avg_dct_spectrum as ads
         profiler_name = "DCT"
