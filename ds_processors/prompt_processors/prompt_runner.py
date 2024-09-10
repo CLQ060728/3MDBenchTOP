@@ -1,4 +1,4 @@
-import paraphraser as para
+from . import paraphraser as para
 import os, json
 
 

@@ -4,7 +4,7 @@
 import torch
 import os
 import json
-import generation_script as gs
+from . import generation_script as gs
 
 
 def run(project_root, ds_name, model_name, max_bound, img_width, img_height,

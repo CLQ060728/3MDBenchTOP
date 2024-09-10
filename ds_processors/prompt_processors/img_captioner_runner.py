@@ -3,7 +3,7 @@
 
 # import builtins
 # builtins.LLAVA_PATH_ = "/home/jovyan/3MDBench/ds_processors/prompt_processors/LLaVA_NeXT/"
-import image_captioner as ic
+from . import image_captioner as ic
 import os, json
 import torch
 import numpy as np

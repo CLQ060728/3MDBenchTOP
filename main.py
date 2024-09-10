@@ -1,5 +1,6 @@
 import argparse
 import os
+import torch
 
 
 def get_args_parser():
@@ -11,7 +12,7 @@ def get_args_parser():
     parser.add_argument('--project_root', default="./", type=str, required=True,
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, required=True, help="""Specify the gpu id.""")
-    parser.add_argument('--dataset_name', default="MSCOCO", type=str, required=True, 
+    parser.add_argument('--dataset_name', default="MSCOCO", type=str, 
                         help="""Specify dataset name.""")
     
     parser.add_argument('--aggregate', default=False, type=bool, 
@@ -46,7 +47,7 @@ def get_args_parser():
            help="""Profiling based on real or fake images/frames.""")
     parser.add_argument('--amount', default=80000, type=int, 
                         help="""Specify the total amount of profiling image/video files.""")
-    parser.add_argument('--output_path', default="", type=str, required=True,
+    parser.add_argument('--output_path', default="", type=str,
                         help="""Specify the output path for profilings.""")
     # parser.add_argument('--tau', default=0.996, type=float, help="""BYOL moving average parameter.""")
     # parser.add_argument('--out_sizes', nargs='+', type=int, 
@@ -61,20 +62,20 @@ def main(args_main):
         import builtins
         builtins.LLAVA_PATH_ = os.path.join(args_main.project_root,
                                             "ds_processors/prompt_processors/LLaVA_NeXT")
-        from ds_processors.prompt_processors import image_captioner_runner as icr
-        data_root = os.path.join(args_main.project_root, f"/data/IMAGEs/{args_main.dataset_name}")
-        icr.run(data_root, args_main.max_bound, args_main.previous_bound, args_main.aggregate, device)
+        import ds_processors.prompt_processors.img_captioner_runner as icr
+        data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
+        icr.run(data_root, args_main.max_bound, args_main.previous_bound, device, args_main.aggregate)
     elif args_main.functionality == "PROMPT_GENERATION":
-        from ds_processors.prompt_processors import prompt_runner as pr
-        data_root = os.path.join(args_main.project_root, f"/data/IMAGEs/{args_main.dataset_name}")
+        import ds_processors.prompt_processors.prompt_runner as pr
+        data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
         pr.run(args_main.project_root, data_root, args_main.max_bound)
     elif args_main.functionality == "IMG_GENERATION":
         import builtins
         code_dir_root = os.path.join(args_main.project_root, "ds_processors")
         builtins.CODE_DIR_ROOT_ = code_dir_root
-        from ds_processors.image_generators import img_gen_runner as igr
+        import ds_processors.image_generators.img_gen_runner as igr
         device = torch.device(f'cuda:{args_main.gpu_id}' if torch.cuda.is_available() else 'cpu')
-        t2i_or_i2i = False 
+        t2i_or_i2i = True 
         igr.run(args_main.project_root, args_main.dataset_name, args_main.gen_model, args_main.max_bound,
                 args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, gpu_id, 
                 t2i_or_i2i = t2i_or_i2i, manual_seed=args_main.manual_seed, seed=args_main.seed)
