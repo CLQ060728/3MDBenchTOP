@@ -27,3 +27,24 @@ disown
 python main.py --functionality "IMG_GENERATION" --project_root [PROJECT_PATH] --gen_model [GENERATION MODEL, i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF', 'StableDiffusionXL'] --prompt_type [PROMPT TYPE, i.e., 'raw_prompt', 'para_prompt' and 'cap_prompt'] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --gen_width [WIDTH OF GENERATED IMAGES] --gen_height [HEIGHT OF GENERATED IMAGES] --gpu_id 0 > output.log 2>&1 &
 disown
 ```
+- Dataset profiling
+  - Discrete Cosine Transform (DCT)
+  ```
+  python main.py --functionality "DCT" --project_root [PROJECT_PATH] --real_path [PATH FOR REAL IMAGES/FRAMES] --fake_path [PATH FOR FAKE IMAGES/FRAMES] --total_amount [TOTAL AMOUNT OF IMAGES/FRAMES TO PROFILE] --task_amount [AMOUNT OF IMAGES/FRAMES TO PROFILE FOR EACH PARALLEL TASK] --output_path [OUTPUT PATH FOR PROFILING] > output.log 2>&1 &
+  ```
+  - Discrete Fourier Transform (DFT)
+  ```
+  python main.py --functionality "DFT" --project_root [PROJECT_PATH] --real_path [PATH FOR REAL IMAGES/FRAMES] --fake_path [PATH FOR FAKE IMAGES/FRAMES] --total_amount [TOTAL AMOUNT OF IMAGES/FRAMES TO PROFILE] --task_amount [AMOUNT OF IMAGES/FRAMES TO PROFILE FOR EACH PARALLEL TASK] --output_path [OUTPUT PATH FOR PROFILING] > output.log 2>&1 &
+  ```
+  - Power Spectrum of Discrete Fourier Transform (Power Spectrum of DFT)
+  ```
+  python main.py --functionality "POWER" --project_root [PROJECT_PATH] --real_path [PATH FOR REAL IMAGES/FRAMES] --fake_path [PATH FOR FAKE IMAGES/FRAMES] --total_amount [TOTAL AMOUNT OF IMAGES/FRAMES TO PROFILE] --task_amount [AMOUNT OF IMAGES/FRAMES TO PROFILE FOR EACH PARALLEL TASK] --output_path [OUTPUT PATH FOR PROFILING] > output.log 2>&1 &
+  ```
+  - Gray Level Cooccurrence Matrix (GLCM)
+  ```
+  python main.py --functionality "GLCM" --project_root [PROJECT_PATH] --real_path [PATH FOR REAL IMAGES/FRAMES] --fake_path [PATH FOR FAKE IMAGES/FRAMES] --total_amount [TOTAL AMOUNT OF IMAGES/FRAMES TO PROFILE] --task_amount [AMOUNT OF IMAGES/FRAMES TO PROFILE FOR EACH PARALLEL TASK] --output_path [OUTPUT PATH FOR PROFILING] > output.log 2>&1 &
+  ```
+  - Image/Frame Texture Descriptors (Local binary patterns (LBP), Co-occurrence among Adjacent LBPs (CoALBPs), Local Phase Quantization (LPQ))
+  ```
+  python main.py --functionality "TEXTURE_DESCRIPTORS" --project_root [PROJECT_PATH] --real_path [PATH FOR REAL IMAGES/FRAMES] --fake_path [PATH FOR FAKE IMAGES/FRAMES] --total_amount [TOTAL AMOUNT OF IMAGES/FRAMES TO PROFILE] --task_amount [AMOUNT OF IMAGES/FRAMES TO PROFILE FOR EACH PARALLEL TASK] --output_path [OUTPUT PATH FOR PROFILING] > output.log 2>&1 &
+  ```
