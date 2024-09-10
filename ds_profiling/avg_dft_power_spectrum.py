@@ -247,10 +247,10 @@ def visualise_average_images_psd(images, plot_names, fig_size, rgb_or_g=False, o
         fig.savefig(outFullPath_2D, dpi=fig.dpi)
             
 
-def load_images(input_path, task_amount, size=(512, 512)):
+def load_images(input_path, total_amount, task_amount, size=(512, 512)):
     image_arr = None
     for _, _, img_files in os.walk(input_path):
-        # img_files = img_files[:200]
+        img_files = img_files[:total_amount]
         print(f"img_files length: {len(img_files)}")
         num_tasks = math.ceil(len(img_files) / task_amount)
         print(f"num_tasks: {num_tasks}; img_files length: {len(img_files)}; task_amount: {task_amount}")

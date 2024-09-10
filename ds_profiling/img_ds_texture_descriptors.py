@@ -874,12 +874,12 @@ def get_ds_channels_descriptors_task(img_paths, task_id):
     return channels_descriptors_ds_dict
 
 
-def get_ds_channels_descriptors(input_path, task_amount):
+def get_ds_channels_descriptors(input_path, total_amount, task_amount):
     img_paths = []
     for _, _, img_files in os.walk(input_path):
         for img_file in img_files:
             img_paths.append(os.path.join(input_path, img_file))
-    # img_paths = img_paths[:3]
+    img_paths = img_paths[:total_amount]
     print(f"img_paths length: {len(img_paths)}")
     num_tasks = math.ceil(len(img_paths) / task_amount)
     print(f"num_tasks: {num_tasks}; img_paths length: {len(img_paths)}; task_amount: {task_amount}")

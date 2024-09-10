@@ -105,7 +105,7 @@ def calc_glcm_props_all_agls(img, props, dists, agls, lvl=256, sym=True, norm=Tr
     return glcm_props
 
 
-def compute_glcm_textures(input_path, rgb_or_g, task_amount, output_path="./"):
+def compute_glcm_textures(input_path, rgb_or_g, total_amount, task_amount, output_path="./"):
     def plot_hist(glcm_props_xs, num_rows, num_cols, distances_names, angles_names, properties, channel, output_path):    
         bin_sequence = [round(0.01*num, ndigits=2) for num in range(0, 101, 5)]
         bin_labels = np.array([])
@@ -143,7 +143,7 @@ def compute_glcm_textures(input_path, rgb_or_g, task_amount, output_path="./"):
     for _, _, img_files in os.walk(input_path):
         for img_file in img_files:
             img_paths.append(os.path.join(input_path, img_file))
-    # img_paths = img_paths[:250]
+    img_paths = img_paths[:total_amount]
     num_tasks = math.ceil(len(img_paths) / task_amount)
     print(f"num_tasks: {num_tasks}; img_paths length: {len(img_paths)}; task_amount: {task_amount}")
     remainder = len(img_paths) % task_amount
@@ -284,10 +284,10 @@ def save_glcm_stats(glcm_props_xs, properties, distances_names, angles_names, ch
         file_writer.write(header_str)
 
 
-def load_images(input_path, task_amount, size=(512, 512)):
+def load_images(input_path, total_amount, task_amount, size=(512, 512)):
     image_arr = None
     for _, _, img_files in os.walk(input_path):
-        # img_files = img_files[:200]
+        img_files = img_files[:total_amount]
         print(f"img_files length: {len(img_files)}")
         num_tasks = math.ceil(len(img_files) / task_amount)
         print(f"num_tasks: {num_tasks}; img_files length: {len(img_files)}; task_amount: {task_amount}")

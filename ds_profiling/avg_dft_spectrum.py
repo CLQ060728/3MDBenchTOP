@@ -231,10 +231,10 @@ def visualize_average_frequency_spectra(real_images, fake_images, filename, rgb_
                              f"dft_spectrums_{'colour' if rgb_or_g else 'gray'}_{'fullband' if full_band else ''}.png"))
     plt.close()
 
-def load_images(input_path, task_amount, size=(512, 512)):
+def load_images(input_path, total_amount, task_amount, size=(512, 512)):
     image_arr = None
     for _, _, img_files in os.walk(input_path):
-        # img_files = img_files[:200]
+        img_files = img_files[:total_amount]
         print(f"img_files length: {len(img_files)}")
         num_tasks = math.ceil(len(img_files) / task_amount)
         remainder = len(img_files) % task_amount
