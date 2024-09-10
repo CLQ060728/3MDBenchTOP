@@ -12,7 +12,7 @@ import json
 import os, math
 from control.matlab import unwrap
 from concurrent.futures import ProcessPoolExecutor
-from psds import power_spectrum
+from .psds import power_spectrum
 
 
 def calculate_average_frequency_power_spectra(images, rgb_or_g):

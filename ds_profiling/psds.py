@@ -8,8 +8,8 @@ try:
     pyplotOK = True
 except ImportError:
     pyplotOK = False
-from psd_utils.correlate2d import correlate2d
-from psd_utils.radial_profile import azimuthalAverageBins,radialAverageBins
+from .psd_utils.correlate2d import correlate2d
+from .psd_utils.radial_profile import azimuthalAverageBins,radialAverageBins
 import os
 
 

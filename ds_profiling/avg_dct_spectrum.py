@@ -7,9 +7,9 @@ from datetime import datetime
 import numpy as np
 from matplotlib import pyplot as plt
 
-from dct_utils.dataset import image_paths
-from dct_utils.image_np import dct2, load_image
-from dct_utils.math import log_scale, welford, welford_multidimensional
+from .dct_utils.dataset import image_paths
+from .dct_utils.image_np import dct2, load_image
+from .dct_utils.math import log_scale, welford, welford_multidimensional
 
 
 def _plot(outpath, name, data, **kwargs):
