@@ -127,14 +127,14 @@ def main(args_main):
         real_or_fake = "real"
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name, 
                                 args_main.gen_model, real_or_fake)
-        os.makedirs(output_path, exist_ok = True)
+        os.makedirs(out_path, exist_ok = True)
         idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.total_amount, args_main.task_amount, 
                                    output_path=out_path)
         input_path = args_main.fake_path
         real_or_fake = "fake"
         out_path = os.path.join(args_main.output_path, profiler_name, args_main.dataset_name, 
                                 args_main.gen_model, real_or_fake)
-        os.makedirs(output_path, exist_ok = True)
+        os.makedirs(out_path, exist_ok = True)
         idsc.compute_glcm_textures(input_path, args_main.colour_gray, args_main.total_amount, args_main.task_amount, 
                                    output_path=out_path)
     elif args_main.functionality == "TEXTURE_DESCRIPTORS":
