@@ -12,19 +12,19 @@ pip install --upgrade flash-attn
 - Generate 'raw prompts' and 'paraphrased prompts'
 ```
 # cd project directory
-python ./main.py --functionality "PROMPT_GENERATION" --project_root [PROJECT_PATH] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --previous_bound [ORIGINAL_PROMPT_FILE_SPLIT_LOWER_BOUND] --gpu_id 0 > output.log 2>&1 &
+python ./main.py --functionality "PROMPT_GENERATION" --project_root [PROJECT_PATH] --dataset_name [“MSCOCO”, "CC3M", "VISUAL_GENOME"] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --previous_bound [ORIGINAL_PROMPT_FILE_SPLIT_LOWER_BOUND] --gpu_id 0 > output.log 2>&1 &
 disown
 ```
 - Generate 'image captioning prompts'
 ```
 # cd project directory
-python ./main.py --functionality "IMG_CAPTIONING" --project_root [PROJECT_PATH] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --previous_bound [ORIGINAL_PROMPT_FILE_SPLIT_LOWER_BOUND] --gpu_id 0 > output.log 2>&1 &
+python ./main.py --functionality "IMG_CAPTIONING" --project_root [PROJECT_PATH] --dataset_name [“MSCOCO”, "CC3M", "VISUAL_GENOME"] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --previous_bound [ORIGINAL_PROMPT_FILE_SPLIT_LOWER_BOUND] --gpu_id 0 > output.log 2>&1 &
 disown
 ```
 - Generate images with three different types of text prompts
 ```
 # cd project directory
-python main.py --functionality "IMG_GENERATION" --project_root [PROJECT_PATH] --gen_model [GENERATION MODEL, i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF', 'StableDiffusionXL'] --prompt_type [PROMPT TYPE, i.e., 'raw_prompt', 'para_prompt' and 'cap_prompt'] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --gen_width [WIDTH OF GENERATED IMAGES] --gen_height [HEIGHT OF GENERATED IMAGES] --gpu_id 0 > output.log 2>&1 &
+python main.py --functionality "IMG_GENERATION" --project_root [PROJECT_PATH] --dataset_name [“MSCOCO”, "CC3M", "VISUAL_GENOME"] --gen_model [GENERATION MODEL, i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF', 'StableDiffusionXL'] --prompt_type [PROMPT TYPE, i.e., 'raw_prompt', 'para_prompt' and 'cap_prompt'] --max_bound [ORIGINAL_PROMPT_FILE_SPLIT_UPPER_BOUND] --gen_width [WIDTH OF GENERATED IMAGES] --gen_height [HEIGHT OF GENERATED IMAGES] --gpu_id 0 > output.log 2>&1 &
 disown
 ```
 - Dataset profiling
