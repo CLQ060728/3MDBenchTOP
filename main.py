@@ -13,7 +13,7 @@ def get_args_parser():
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
     parser.add_argument('--dataset_name', default="MSCOCO", type=str, 
-                        help="""Specify dataset name.""")
+                        help="""Specify dataset name, i.e., 'MSCOCO', 'CC3M', 'VISUAL_GENOME'.""")
     
     parser.add_argument('--aggregate', default=False, type=bool, 
            help="""Whether to combine the generated image captioning files (for image captioning).""")
