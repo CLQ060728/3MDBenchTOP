@@ -23,6 +23,10 @@ from PIL import Image
 import requests
 import copy
 import torch
+from torchvision import io
+from typing import Dict
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+
 
 
 def get_llava_next_llama3_8b_model(device):
@@ -64,7 +68,56 @@ def get_image_captions(tokenizer, model, input_ids, image_processor, img_paths, 
             temperature=0.6,
             max_new_tokens=256,
         )
-        text_outputs = tokenizer.batch_decode(cont, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        text_outputs = tokenizer.batch_decode(cont, skip_special_tokens=True, clean_up_tokenization_spaces=True)
         image_captions.append(text_outputs)
+
+    return image_captions
+
+
+def get_qwen2vl_model(cache_dir):
+    model = Qwen2VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2-VL-7B-Instruct", torch_dtype="auto", device_map="auto", cache_dir=cache_dir
+    )
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct", cache_dir=cache_dir)
+
+    return model, processor
+
+
+def get_img_captions_qwen(model, processor, img_paths, device):
+    conversation = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                },
+                {"type": "text", "text": "What is shown in this image?"},
+            ],
+        }
+    ]
+    # Preprocess the inputs
+    text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+    # Excepted output: '<|im_start|>system\nYou are a helpful assistant.
+    # <|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>Describe this image.
+    # <|im_end|>\n<|im_start|>assistant\n'
+    
+    image_captions = []
+    for img_path in img_paths:
+        image = Image.open(img_path)
+        inputs = processor(
+            text=[text_prompt], images=[image], padding=True, return_tensors="pt"
+        )
+        inputs = inputs.to(device)
+        
+        # Inference: Generation of the output
+        output_ids = model.generate(**inputs, max_new_tokens=256)
+        generated_ids = [
+            output_ids[len(input_ids) :]
+            for input_ids, output_ids in zip(inputs.input_ids, output_ids)
+        ]
+        output_text = processor.batch_decode(
+            generated_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
+        )
+        image_captions.append(output_text)
 
     return image_captions

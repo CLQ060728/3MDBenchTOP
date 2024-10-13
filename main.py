@@ -21,6 +21,9 @@ def get_args_parser():
                         help="""Specify the max file bound for 'IMG_CAPTIONING' and 'PROMPT_GENERATION'.""")
     parser.add_argument('--previous_bound', default=0, type=int, 
            help="""Specify the previous file bound for 'IMG_CAPTIONING' and 'PROMPT_GENERATION'.""")
+    parser.add_argument('--cap_model', default="", type=str, 
+                        help="""Specify the image captioning model for prompts generation,"""
+                        + """ i.e., 'LLAVA', 'QWEN'.""")
     
     parser.add_argument('--gen_model', default="", type=str, 
                         help="""Specify the generation model for generation and profiling,"""
@@ -67,7 +70,9 @@ def main(args_main):
                                             "ds_processors/prompt_processors/LLaVA_NeXT")
         import ds_processors.prompt_processors.img_captioner_runner as icr
         data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
-        icr.run(data_root, args_main.max_bound, args_main.previous_bound, device, args_main.aggregate)
+        cache_dir = f"{args_main.project_root}ds_processors/prompt_processors/Qwen2VL/"
+        icr.run(data_root, args_main.cap_model, cache_dir, args_main.max_bound, args_main.previous_bound,
+                device, args_main.aggregate)
     elif args_main.functionality == "PROMPT_GENERATION":
         import ds_processors.prompt_processors.prompt_runner as pr
         data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
