@@ -6,3 +6,4 @@ output/
 Qwen2VL/
 3mdvenv/
 CC3M/*.txt
+VISUAL_GENOME/*.txt
