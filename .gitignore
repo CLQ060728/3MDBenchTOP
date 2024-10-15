@@ -5,5 +5,6 @@ Meta-Llama-3-8B-Instruct/
 output/
 Qwen2VL/
 3mdvenv/
-CC3M/*.txt
-VISUAL_GENOME/*.txt
+CC3M/
+VISUAL_GENOME/
+MSCOCO/
