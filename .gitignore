@@ -9,3 +9,4 @@ CC3M/
 VISUAL_GENOME/
 MSCOCO/
 !generated/
+logs/
