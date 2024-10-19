@@ -9,6 +9,18 @@ from colossalai.cluster import DistCoordinator
 from mmengine.runner import set_random_seed
 from tqdm import tqdm
 
+OPENSORA_PATH = None
+
+import builtins
+import sys
+
+if hasattr(builtins, "OPENSORA_PATH_"):
+    OPENSORA_PATH = builtins.OPENSORA_PATH_
+else:
+    assert OPENSORA_PATH is not None, "Please specify OPENSORA_PATH!"
+    
+sys.path.insert(0, OPENSORA_PATH)
+
 from opensora.acceleration.parallel_states import set_sequence_parallel_group
 from opensora.datasets import save_sample
 from opensora.datasets.aspect import get_image_size, get_num_frames
@@ -34,16 +46,16 @@ from opensora.utils.inference_utils import (
 from opensora.utils.misc import all_exists, create_logger, is_distributed, is_main_process, to_torch_dtype
 
 
-def main():
+def run_opensora(cfg):
     torch.set_grad_enabled(False)
     # ======================================================
     # configs & runtime variables
     # ======================================================
     # == parse configs ==
-    cfg = parse_configs(training=False)
+    # cfg = parse_configs(training=False)
 
     # == device and dtype ==
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = f"cuda:{cfg.gpu_id}" if torch.cuda.is_available() else "cpu"
     cfg_dtype = cfg.get("dtype", "fp32")
     assert cfg_dtype in ["fp16", "bf16", "fp32"], f"Unknown mixed precision {cfg_dtype}"
     dtype = to_torch_dtype(cfg.get("dtype", "bf16"))
@@ -300,5 +312,5 @@ def main():
     logger.info("Saved %s samples to %s", start_idx, save_dir)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

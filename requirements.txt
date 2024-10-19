@@ -1,5 +1,5 @@
-setuptools==72.1.0
-wheel==0.44.0
+setuptools
+wheel
 numpy==1.26.4
 scipy==1.14.0
 pandas==2.2.2
