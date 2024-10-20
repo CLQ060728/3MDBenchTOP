@@ -1,1 +1,0 @@
-VISUAL_GENOME/*.txt filter=lfs diff=lfs merge=lfs -text
