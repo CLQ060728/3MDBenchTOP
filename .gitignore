@@ -13,4 +13,5 @@ Qwen2VL/
 !**/MSCOCO/generated/
 !**/CC3M/generated/
 !**/VISUAL_GENOME/generated/
+cache/
 logs/
