@@ -1,19 +1,23 @@
 import argparse
 import os
 import torch
+import json
+from ds_processors.video_generators import video_gen_runner as vgr
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('3MDBench', add_help=False)
     # parser.add_argument bool value, default must be False, even you make it to True, it is still False, when set in the command line, it's always True;
     parser.add_argument('--functionality', default="", type=str, required=True,
-           help="""Choose the functionality to use, which includes 'IMG_CAPTIONING', 'PROMPT_GENERATION',"""
-                + """'IMG_GENERATION', 'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'.""")
+           help="""Choose the functionality to use, which includes 'IMG_CAPTIONING', 'PROMPT_GENERATION', """
+                + """'IMG_GENERATION', 'VIDEO_GENERATION', 'DCT', 'DFT', 'POWER', 'GLCM', """
+                + """'TEXTURE_DESCRIPTORS'.""")
     parser.add_argument('--project_root', default="./", type=str, required=True,
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
-    parser.add_argument('--dataset_name', default="MSCOCO", type=str, 
-                        help="""Specify dataset name, i.e., 'MSCOCO', 'CC3M', 'VISUAL_GENOME'.""")
+    parser.add_argument('--dataset_name', default="", type=str, required=True, 
+                        help="""Specify dataset name, i.e., 'MSCOCO', 'CC3M', 'VISUAL_GENOME', """
+                       + """'MSR-VTT', 'CelebV-Text'.""")
     
     parser.add_argument('--aggregate', default=False, type=bool, 
            help="""Whether to combine the generated image captioning files (for image captioning).""")
@@ -28,7 +32,7 @@ def get_args_parser():
     parser.add_argument('--gen_model', default="", type=str, 
                         help="""Specify the generation model for generation and profiling,"""
                         + """ i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF',"""
-                        + """'StableDiffusionXL'.""")
+                        + """'StableDiffusionXL', 'OpenSora1_2'.""")
     parser.add_argument('--prompt_type', default="raw_prompt", type=str, 
                         help="""Specify prompt type, 'raw_prompt', 'para_prompt', 'cap_prompt'.""")
     parser.add_argument('--gen_width', default=512, type=int, help="""The width of the generated images/frames.""")
@@ -75,8 +79,13 @@ def main(args_main):
                 device, args_main.aggregate)
     elif args_main.functionality == "PROMPT_GENERATION":
         import ds_processors.prompt_processors.prompt_runner as pr
-        data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
-        pr.run(args_main.project_root, data_root, args_main.max_bound)
+        if args_main.dataset_name in ["MSCOCO", "CC3M", "VISUAL_GENOME"]:
+            content_type = "image"
+            data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
+        elif args_main.dataset_name in ["MSR-VTT", "CelebV-Text"]:
+            content_type = "video"
+            data_root = f"{args_main.project_root}data/VIDEOs/{args_main.dataset_name}/"
+        pr.run(args_main.project_root, data_root, args_main.max_bound, content_type)
     elif args_main.functionality == "IMG_GENERATION":
         import builtins
         code_dir_root = os.path.join(args_main.project_root, "ds_processors")
@@ -86,6 +95,8 @@ def main(args_main):
         igr.run(args_main.project_root, args_main.dataset_name, args_main.gen_model, args_main.max_bound,
                 args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, args_main.gpu_id, 
                 t2i_or_i2i = args_main.text2image, manual_seed=args_main.manual_seed, seed=args_main.seed)
+    elif args_main.functionality == "VIDEO_GENERATION":
+        pass
     elif args_main.functionality == "DCT":
         import ds_profiling.avg_dct_spectrum as ads
         profiler_name = "DCT"
@@ -173,5 +184,6 @@ def main(args_main):
 
 if __name__ == '__main__':
     parser_main = argparse.ArgumentParser('3MDBench_main', parents=[get_args_parser()])
+    parser_main = vgr.get_opensora_args(parser_main)
     args_main = parser_main.parse_args()
     main(args_main)

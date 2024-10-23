@@ -2,14 +2,23 @@ from . import paraphraser as para
 import os, json
 
 
-def run(project_root, data_root, file_suffix):
+def run(project_root, data_root, file_suffix, content_type):
     dict_file_path = os.path.join(data_root, f"sel_captions_{file_suffix}.txt")
     with open(dict_file_path, "r") as dict_file:
         selected_img_cap_dict = json.load(dict_file)
 
-    raw_img_caption_prefixes = ["a high fidelity, high resolution image of ", "a high fidelity, high resolution picture of ",
-                                "a high fidelity, high resolution photo of ", "a high fidelity, high resolution photograph of ",
-                                "a high fidelity, high resolution, realistic image of "]
+    if content_type == "image":
+        raw_img_caption_prefixes = ["a high fidelity, high resolution image of ",
+                                    "a high fidelity, high resolution picture of ",
+                                    "a high fidelity, high resolution photo of ",
+                                    "a high fidelity, high resolution photograph of ",
+                                    "a high fidelity, high resolution, realistic image of "]
+    else:
+        raw_img_caption_prefixes = ["a high fidelity, high resolution video of ",
+                                    "a high fidelity, high resolution, live video of ",
+                                    "a realistic video of ",
+                                    "a realistic live video of ",
+                                    "a high fidelity, high resolution, realistic video of "]
     try:
         raw_img_caption_dict = dict()
         para_img_caption_dict = dict()
@@ -24,7 +33,8 @@ def run(project_root, data_root, file_suffix):
                 for raw_img_prefix in raw_img_caption_prefixes:
                     raw_img_caption_dict[sel_key].append(f"{raw_img_prefix}{cap_string}")
                 pipeline, terminators = para.get_paraphrase_pipeline(model_id)
-                para_captions = para.paraphrase_image_captions(pipeline, terminators, sel_cap_list, "")
+                para_captions = para.paraphrase_image_captions(pipeline, terminators, sel_cap_list, "",
+                                                               content_type)
                 para_img_caption_dict[sel_key] = para_captions
 
                 if counter % 1000 == 0:
