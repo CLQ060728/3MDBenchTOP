@@ -22,8 +22,12 @@ def run(project_root, data_root, file_suffix, content_type):
     try:
         raw_img_caption_dict = dict()
         para_img_caption_dict = dict()
-        raw_out_file_path = os.path.join(data_root, "generated", f"raw_img_caption_{file_suffix}.txt")
-        para_out_file_path = os.path.join(data_root, "generated", f"para_img_caption_{file_suffix}.txt")
+        if content_type == "image":
+            raw_out_file_path = os.path.join(data_root, "generated", f"raw_img_caption_{file_suffix}.txt")
+            para_out_file_path = os.path.join(data_root, "generated", f"para_img_caption_{file_suffix}.txt")
+        else:
+            raw_out_file_path = os.path.join(data_root, "generated", f"raw_vid_caption_{file_suffix}.txt")
+            para_out_file_path = os.path.join(data_root, "generated", f"para_vid_caption_{file_suffix}.txt")
         with open(raw_out_file_path, "a") as raw_out_file, open(para_out_file_path, "a") as para_out_file:
             model_id = os.path.join(project_root, "llama3/Meta-Llama-3-8B-Instruct")
             counter = 1

@@ -1,7 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
-apex/
-colossalai/
+
+
 selected/
 llama3/
 Meta-Llama-3-8B-Instruct/
