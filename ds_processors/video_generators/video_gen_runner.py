@@ -4,6 +4,7 @@ import torch
 import json
 from glob import glob
 from mmengine.config import Config
+import numpy as np
 
 
 def get_opensora_args(parser):
@@ -27,7 +28,7 @@ def get_opensora_args(parser):
     parser.add_argument("--layernorm-kernel", default=None, type=str2bool, help="enable layernorm kernel")
     parser.add_argument("--resolution", default=None, type=str, help="multi resolution")
     parser.add_argument("--data-path", default=None, type=str, help="path to data csv")
-    parser.add_argument("--dtype", default=None, type=str, help="data type")
+    parser.add_argument("--dtype", default="bf16", type=str, help="data type")
 
     # ======================================================
     # Inference
@@ -39,11 +40,11 @@ def get_opensora_args(parser):
     parser.add_argument("--start-index", default=None, type=int, help="start index for sample name")
     parser.add_argument("--end-index", default=None, type=int, help="end index for sample name")
     parser.add_argument("--num-sample", default=None, type=int, help="number of samples to generate for one prompt")
-    # parser.add_argument("--prompt-as-path", action="store_true", help="use prompt as path to save samples")
+    parser.add_argument("--prompt-as-path", action="store_true", help="use prompt as path to save samples")
     parser.add_argument("--verbose", default=None, type=int, help="verbose level")
 
     # prompt
-    # parser.add_argument("--prompt-path", default=None, type=str, help="path to prompt txt file")
+    parser.add_argument("--prompt-path", default=None, type=str, help="path to prompt txt file")
     parser.add_argument("--prompt", default=None, type=str, nargs="+", help="prompt list")
     parser.add_argument("--llm-refine", default=None, type=str2bool, help="enable LLM refine")
     parser.add_argument("--prompt-generator", default=None, type=str, help="prompt generator")
@@ -58,7 +59,7 @@ def get_opensora_args(parser):
     parser.add_argument("--watermark", default=None, type=str2bool, help="watermark video")
 
     # hyperparameters
-    parser.add_argument("--num-sampling-steps", default=None, type=int, help="sampling steps")
+    parser.add_argument("--num-sampling-steps", default=50, type=int, help="sampling steps")
     parser.add_argument("--cfg-scale", default=None, type=float, help="balance between cond & uncond")
 
     # reference
@@ -134,8 +135,34 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
-#######################################################OPENSORA ABOVE###############################################
+###############################################OPENSORA ABOVE###############################################
+def get_prompt_list(prompt_type, prompt_root, max_bound):
+    if prompt_type == "raw_prompt":
+        prompt_file_path = os.path.join(prompt_root, f"raw_vid_caption_{max_bound}.txt")
+    elif prompt_type == "para_prompt":
+        prompt_file_path = os.path.join(prompt_root, f"para_vid_caption_{max_bound}.txt")
+    elif prompt_type == "cap_prompt":
+        prompt_file_path = os.path.join(prompt_root, f"captioner_vid_caption_{max_bound}.txt")
+    with open(prompt_file_path, "r") as prompt_file:
+        prompt_dict = json.load(prompt_file)
+
+    prompt_list = []
+    for prompt_key, prompt_val_list in prompt_dict.items():
+        sel_index = np.random.randint(0, len(prompt_val_list), size=1, dtype=int)
+        prompt_list.append(prompt_val_list[sel_index[0]])
+    
+    return prompt_list
+    
+    
 def run(args_main):
+    prompt_root = os.path.join(args_main.project_root, "data/VIDEOs", args_main.dataset_name,
+                               "generated")
+    args_main.prompt = get_prompt_list(args_main.prompt_type, prompt_root, args_main.max_bound)
+    args_main.save_dir = os.path.join(args_main.project_root, "data/VIDEOs", "generated",
+                                      args_main.gen_model, args_main.dataset_name,
+                                      args_main.prompt_type, args_main.resolution)
+    os.makedirs(args_main.save_dir, exist_ok = True)
+    
     if args_main.gen_model == "OpenSora1_2":
         import builtins
         opensora_root = os.path.join(args_main.project_root, "ds_processors", "video_generators",
@@ -144,5 +171,5 @@ def run(args_main):
         sora_config_path = os.path.join(opensora_root, "configs/opensora-v1-2/inference/sample.py")
         cfg = read_config(sora_config_path)
         cfg = merge_args(cfg, args_main)
-        from OpenSora1_2.OpenSora.scripts import inference as infer
+        from .OpenSora1_2.OpenSora.scripts import inference as infer
         infer.run_opensora(cfg)

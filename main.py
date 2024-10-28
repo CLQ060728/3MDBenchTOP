@@ -117,7 +117,7 @@ def main(args_main):
                 args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, args_main.gpu_id, 
                 t2i_or_i2i = args_main.text2image, manual_seed=args_main.manual_seed, seed=args_main.seed)
     elif args_main.functionality == "VIDEO_GENERATION":
-        pass
+        vgr.run(args_main)
     elif args_main.functionality == "DCT":
         import ds_profiling.avg_dct_spectrum as ads
         profiler_name = "DCT"
