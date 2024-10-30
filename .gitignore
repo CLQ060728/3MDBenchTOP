@@ -1,7 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
 
-selected/
+
 llama3/
 Meta-Llama-3-8B-Instruct/
 output/
@@ -9,7 +9,7 @@ Qwen2VL/
 PLLaVA/
 LLaVA_NeXT/
 OpenSora1_2/
-3mdvenv/
+
 **/CC3M/*
 **/VISUAL_GENOME/*
 **/MSCOCO/*
