@@ -9,6 +9,7 @@ Qwen2VL/
 PLLaVA/
 LLaVA_NeXT/
 3mdvenv/
+checkpoints/
 
 **/CC3M/*
 !**/CC3M/generated/
