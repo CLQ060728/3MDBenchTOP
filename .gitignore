@@ -11,12 +11,30 @@ LLaVA_NeXT/
 3mdvenv/
 
 **/CC3M/*
+!**/CC3M/generated/
+!**/CC3M/cap_prompt/
+!**/CC3M/para_prompt/
+!**/CC3M/raw_prompt/
 **/VISUAL_GENOME/*
+!**/VISUAL_GENOME/generated/
+!**/VISUAL_GENOME/cap_prompt/
+!**/VISUAL_GENOME/para_prompt/
+!**/VISUAL_GENOME/raw_prompt/
 **/MSCOCO/*
 !**/MSCOCO/generated/
-!**/CC3M/generated/
-!**/VISUAL_GENOME/generated/
-
+!**/MSCOCO/cap_prompt/
+!**/MSCOCO/para_prompt/
+!**/MSCOCO/raw_prompt/
+**/MSR-VTT/*
+!**/MSR-VTT/generated/
+!**/MSR-VTT/cap_prompt/
+!**/MSR-VTT/para_prompt/
+!**/MSR-VTT/raw_prompt/
+**/CelebV-Text/*
+!**/CelebV-Text/generated/
+!**/CelebV-Text/cap_prompt/
+!**/CelebV-Text/para_prompt/
+!**/CelebV-Text/raw_prompt/
 
 cache/
 logs/
