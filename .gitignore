@@ -16,10 +16,7 @@ LLaVA_NeXT/
 !**/MSCOCO/generated/
 !**/CC3M/generated/
 !**/VISUAL_GENOME/generated/
-**/MSR-VTT/*
-!**/MSR-VTT/generated/
-**/CelebV-Text/*
-!**/CelebV-Text/generated/
+
 
 cache/
 logs/
