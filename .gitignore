@@ -1,7 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
 
-
+selected/
 llama3/
 Meta-Llama-3-8B-Instruct/
 output/
@@ -16,5 +16,10 @@ OpenSora1_2/
 !**/MSCOCO/generated/
 !**/CC3M/generated/
 !**/VISUAL_GENOME/generated/
+**/MSR-VTT/*
+!**/MSR-VTT/generated/
+**/CelebV-Text/*
+!**/CelebV-Text/generated/
+
 cache/
 logs/
