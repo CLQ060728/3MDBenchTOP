@@ -50,7 +50,7 @@ def convert_captioner_img_caption_files(captioner_img_cap_path_root, captioner_i
         json.dump(captioner_img_caption_dict, captioner_img_caption_file, indent=4)
 
 
-def generate_img_cap_captions(max_bound, previous_bound, path_root, device):
+def generate_img_cap_captions(max_bound, previous_bound, path_root, cap_model_name, device):
     dict_file_path = os.path.join(path_root, f"sel_captions_{max_bound}.txt")
     img_cap_dict_file_path = os.path.join(path_root, "image_caption_dict.txt")
     
@@ -66,7 +66,7 @@ def generate_img_cap_captions(max_bound, previous_bound, path_root, device):
             img_paths.append(img_path)
 
     for file_count in range(1, 11, 1):
-        out_file_path = os.path.join(path_root, "generated", f"captioner_img_caption_{max_bound}_{file_count}.txt")
+        out_file_path = os.path.join(path_root, "generated", f"captioner_img_caption_{cap_model_name}_{max_bound}_{file_count}.txt")
         tokenizer = model = input_ids = image_processor = None
         tokenizer, model, input_ids, image_processor = ic.get_llava_next_llama3_8b_model(device)
         with open(out_file_path, "a") as out_file:
@@ -78,7 +78,7 @@ def generate_img_cap_captions(max_bound, previous_bound, path_root, device):
                 print(f"counter:[{(previous_bound+(counter-1)*1000)}:{(previous_bound+counter*1000)}]")  
 
 
-def generate_img_cap_captions_qwen(max_bound, previous_bound, path_root, cache_dir, device):
+def generate_img_cap_captions_qwen(max_bound, previous_bound, path_root, cache_dir, cap_model_name, device):
     dict_file_path = os.path.join(path_root, f"sel_captions_{max_bound}.txt")
     img_cap_dict_file_path = os.path.join(path_root, "image_caption_dict.txt")
     
@@ -94,7 +94,7 @@ def generate_img_cap_captions_qwen(max_bound, previous_bound, path_root, cache_d
             img_paths.append(img_path)
 
     for file_count in range(1, 11, 1):
-        out_file_path = os.path.join(path_root, "generated", f"captioner_img_caption_{max_bound}_{file_count}.txt")
+        out_file_path = os.path.join(path_root, "generated", f"captioner_img_caption_{cap_model_name}_{max_bound}_{file_count}.txt")
         model = processor = None
         model, processor = ic.get_qwen2vl_model(cache_dir)
         with open(out_file_path, "a") as out_file:
@@ -108,13 +108,13 @@ def generate_img_cap_captions_qwen(max_bound, previous_bound, path_root, cache_d
 
 def run(data_root, cap_model_name, cache_dir, max_bound, previous_bound, device, aggregate=False):
     captioner_img_cap_path_root = os.path.join(data_root, "generated")
-    captioner_img_cap_file_prefix = f"captioner_img_caption_{max_bound}"
+    captioner_img_cap_file_prefix = f"captioner_img_caption_{cap_model_name}_{max_bound}"
     sel_dict_file_path = os.path.join(data_root, f"sel_captions_{max_bound}.txt")
     if not aggregate:
         if cap_model_name == "LLAVA":
-            generate_img_cap_captions(max_bound, previous_bound, data_root, device)
+            generate_img_cap_captions(max_bound, previous_bound, data_root, cap_model_name, device)
         elif cap_model_name == "QWEN":
-            generate_img_cap_captions_qwen(max_bound, previous_bound, data_root, cache_dir, device)
+            generate_img_cap_captions_qwen(max_bound, previous_bound, data_root, cache_dir, cap_model_name, device)
     else:
         convert_captioner_img_caption_files(captioner_img_cap_path_root, captioner_img_cap_file_prefix,
                                             sel_dict_file_path)
