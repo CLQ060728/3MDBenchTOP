@@ -6,8 +6,7 @@ llama3/
 Meta-Llama-3-8B-Instruct/
 output/
 Qwen2VL/
-PLLaVA/
-LLaVA_NeXT/
+**/PLLaVA/models/
 3mdvenv/
 checkpoints/
 
