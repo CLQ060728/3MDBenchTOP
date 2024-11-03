@@ -176,18 +176,19 @@ def run_opensora(cfg):
         # == Iter over number of sampling for one prompt ==
         for k in range(num_sample):
             # == prepare save paths ==
-            save_paths = [
-                get_save_path_name(
-                    save_dir,
-                    sample_name=sample_name,
-                    sample_idx=start_idx + idx,
-                    prompt=original_batch_prompts[idx],
-                    prompt_as_path=prompt_as_path,
-                    num_sample=num_sample,
-                    k=k,
-                )
-                for idx in range(len(batch_prompts))
-            ]
+            # save_paths = [
+            #     get_save_path_name(
+            #         save_dir,
+            #         sample_name=sample_name,
+            #         sample_idx=start_idx + idx,
+            #         prompt=original_batch_prompts[idx],
+            #         prompt_as_path=prompt_as_path,
+            #         num_sample=num_sample,
+            #         k=k,
+            #     )
+            #     for idx in range(len(batch_prompts))
+            # ]
+            save_paths = [os.path.join(save_dir, sample_name)]
 
             # NOTE: Skip if the sample already exists
             # This is useful for resuming sampling VBench

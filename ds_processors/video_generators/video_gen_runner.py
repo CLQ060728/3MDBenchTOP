@@ -35,13 +35,13 @@ def get_opensora_args(parser):
     # ======================================================
     # if not training:
     # output
-    parser.add_argument("--save-dir", default=None, type=str, help="path to save generated samples")
-    parser.add_argument("--sample-name", default=None, type=str, help="sample name, default is sample_idx")
-    parser.add_argument("--start-index", default=None, type=int, help="start index for sample name")
-    parser.add_argument("--end-index", default=None, type=int, help="end index for sample name")
+    # parser.add_argument("--save-dir", default=None, type=str, help="path to save generated samples")
+    # parser.add_argument("--sample-name", default=None, type=str, help="sample name, default is sample_idx")
+    # parser.add_argument("--start-index", default=None, type=int, help="start index for sample name")
+    # parser.add_argument("--end-index", default=None, type=int, help="end index for sample name")
     parser.add_argument("--num-sample", default=None, type=int, help="number of samples to generate for one prompt")
     parser.add_argument("--prompt-as-path", action="store_true", help="use prompt as path to save samples")
-    parser.add_argument("--verbose", default=None, type=int, help="verbose level")
+    # parser.add_argument("--verbose", default=None, type=int, help="verbose level")
 
     # prompt
     parser.add_argument("--prompt-path", default=None, type=str, help="path to prompt txt file")
@@ -135,7 +135,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
-###############################################OPENSORA ABOVE###############################################
+##################################OPENSORA ABOVE##########################################
 def get_prompt_list(prompt_type, prompt_root, max_bound):
     if prompt_type == "raw_prompt":
         prompt_file_path = os.path.join(prompt_root, f"raw_vid_caption_{max_bound}.txt")
@@ -146,18 +146,26 @@ def get_prompt_list(prompt_type, prompt_root, max_bound):
     with open(prompt_file_path, "r") as prompt_file:
         prompt_dict = json.load(prompt_file)
 
+    prompt_dict_keys = list(prompt_dict.keys())
+    index_key_mapping = dict()
+    for prompt_key_index in range(len(list(prompt_dict.keys()))):
+        index_key_mapping[prompt_key_index] = prompt_dict_keys[prompt_key_index]
+    
+    prompt_keys = []
     prompt_list = []
     for prompt_key, prompt_val_list in prompt_dict.items():
         sel_index = np.random.randint(0, len(prompt_val_list), size=1, dtype=int)
+        prompt_keys.append(index_key_mapping[sel_index[0]])
         prompt_list.append(prompt_val_list[sel_index[0]])
     
-    return prompt_list
+    return prompt_keys, prompt_list
     
     
 def run(args_main):
     prompt_root = os.path.join(args_main.project_root, "data/VIDEOs", args_main.dataset_name,
                                "generated")
-    args_main.prompt = get_prompt_list(args_main.prompt_type, prompt_root, args_main.max_bound)
+    prompt_keys, prompts_list = get_prompt_list(args_main.prompt_type, prompt_root,
+                                                args_main.max_bound)
     args_main.save_dir = os.path.join(args_main.project_root, "data/VIDEOs", "generated",
                                       args_main.gen_model, args_main.dataset_name,
                                       args_main.prompt_type, args_main.resolution)
@@ -170,6 +178,14 @@ def run(args_main):
         builtins.OPENSORA_PATH_ = opensora_root
         sora_config_path = os.path.join(opensora_root, "configs/opensora-v1-2/inference/sample.py")
         cfg = read_config(sora_config_path)
-        cfg = merge_args(cfg, args_main)
         from .OpenSora1_2.OpenSora.scripts import inference as infer
-        infer.run_opensora(cfg)
+        prompts_index = 0
+        for prompt in prompts_list:
+            print(f"Current prompt string: {prompt}")
+            args_main.seed = np.random.randint(0, 100000, size=1).item()
+            args_main.prompt = [prompt]
+            args_main.sample_name = f"{prompt_keys[prompts_index]}.mp4"
+            print(f"Current sample name: {args_main.sample_name};")
+            cfg = merge_args(cfg, args_main)
+            infer.run_opensora(cfg)
+            prompts_index += 1
