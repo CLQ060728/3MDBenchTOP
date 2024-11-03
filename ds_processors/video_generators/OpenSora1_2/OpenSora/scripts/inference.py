@@ -76,7 +76,7 @@ def run_opensora(cfg):
 
     # == init logger ==
     logger = create_logger()
-    logger.info("Inference configuration:\n %s", pformat(cfg.to_dict()))
+    # logger.info("Inference configuration:\n %s", pformat(cfg.to_dict()))
     verbose = cfg.get("verbose", 1)
     progress_wrap = tqdm if verbose == 1 else (lambda x: x)
 
