@@ -184,7 +184,7 @@ def run(args_main):
             print(f"Current prompt string: {prompt}")
             args_main.seed = np.random.randint(0, 100000, size=1).item()
             args_main.prompt = [prompt]
-            args_main.sample_name = f"{prompt_keys[prompts_index]}.mp4"
+            args_main.sample_name = f"{prompt_keys[prompts_index]}"
             print(f"Current sample name: {args_main.sample_name};")
             cfg = merge_args(cfg, args_main)
             infer.run_opensora(cfg)
