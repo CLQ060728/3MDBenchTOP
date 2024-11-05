@@ -12,7 +12,7 @@ def get_args_parser():
         help="""Choose the functionality to use, which includes 'IMG_CAPTIONING', 'VIDEO_CAPTIONING', """
                 + """'PROMPT_GENERATION', 'IMG_GENERATION', 'VIDEO_GENERATION', """
                 + """'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'. For videos: """
-                + """'VQA', 'IS', 'flow_score', 'warping_error'.""")
+                + """'VQA', 'IS', 'flow_score', 'warping_error', 'peak_est', 'key_frames'.""")
     parser.add_argument('--project_root', default="./", type=str, required=True,
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
@@ -67,7 +67,8 @@ def get_args_parser():
                         help="""Specify the amount of profiling image/video files per task.""")
     parser.add_argument('--output_path', default="./output/", type=str,
                         help="""Specify the output path for profilings.""")
-    # parser.add_argument('--tau', default=0.996, type=float, help="""BYOL moving average parameter.""")
+    parser.add_argument('--diff_threshold', default=0.3, type=float, 
+                        help="""Threshold of the image difference for peak estimation.""")
     # parser.add_argument('--out_sizes', nargs='+', type=int, 
     # help="""Embedding layer output feature sizes""")
     
@@ -217,7 +218,23 @@ def main(args_main):
         output_path_root = os.path.join(args_main.output_path, vid_set_name)
         vde.run_evalcrafter_metrics(args_main.project_root, data_path, args_main.functionality,
                                     args_main.gpu_id, vid_set_name, output_path_root)
-
+    elif args_main.functionality == "peak_est" or args_main.functionality == "key_frames":
+        if args_main.real_path != "":
+            vid_set_name = f"{args_main.dataset_name}_real"
+            vid_file_path = args_main.real_path
+        elif args_main.fake_path != "":
+            vid_set_name = f"{args_main.dataset_name}_fake"
+            vid_file_path = args_main.fake_path
+        else:
+            raise ValueError('Please either specify real_path or fake_path!')
+            
+        output_path = os.path.join(args_main.output_path, vid_set_name, args_main.functionality)
+        import ds_profiling.vid_key_frames_extractor as vkfe
+        if args_main.functionality == "peak_est":
+            vkfe.compute_peak_est_key_frames(vid_file_path, output_path, args_main.diff_threshold)
+        elif args_main.functionality == "key_frames":
+            vkfe.compute_katna_key_frames(vid_file_path, output_path)
+    
 
 if __name__ == '__main__':
     parser_main = argparse.ArgumentParser('3MDBench_main', parents=[get_args_parser()])
