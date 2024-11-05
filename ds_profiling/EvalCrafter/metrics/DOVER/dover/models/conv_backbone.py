@@ -7,6 +7,17 @@ from timm.models.registry import register_model
 # from open_clip import CLIP3D
 import open_clip
 
+EVAL_CRAFTER_PATH = None
+
+import builtins
+import sys
+
+if hasattr(builtins, "EVAL_CRAFTER_PATH_"):
+    EVAL_CRAFTER_PATH = builtins.EVAL_CRAFTER_PATH_
+else:
+    assert EVAL_CRAFTER_PATH is not None, "Please specify EVAL_CRAFTER_PATH!"
+
+
 class GRN(nn.Module):
     """ GRN (Global Response Normalization) layer
     """
@@ -602,15 +613,15 @@ class ConvNeXtV23D(nn.Module):
 #     return model
 
 model_urls = {
-    "convnext_tiny_1k": "../../checkpoints/DOVER/convnext_tiny_1k_224_ema.pth",
-    "convnext_small_1k": "../../checkpoints/DOVER/convnext_small_1k_224_ema.pth",
-    "convnext_base_1k": "../../checkpoints/DOVER/convnext_base_1k_224_ema.pth",
-    "convnext_large_1k": "../../checkpoints/DOVER/convnext_large_1k_224_ema.pth",
-    "convnext_tiny_22k": "../../checkpoints/DOVER/convnext_tiny_22k_224.pth",
-    "convnext_small_22k": "../../checkpoints/DOVER/convnext_small_22k_224.pth",
-    "convnext_base_22k": "../../checkpoints/DOVER/convnext_base_22k_224.pth",
-    "convnext_large_22k": "../../checkpoints/DOVER/convnext_large_22k_224.pth",
-    "convnext_xlarge_22k": "../../checkpoints/DOVER/convnext_xlarge_22k_224.pth",
+    "convnext_tiny_1k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_tiny_1k_224_ema.pth",
+    "convnext_small_1k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_small_1k_224_ema.pth",
+    "convnext_base_1k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_base_1k_224_ema.pth",
+    "convnext_large_1k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_large_1k_224_ema.pth",
+    "convnext_tiny_22k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_tiny_22k_224.pth",
+    "convnext_small_22k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_small_22k_224.pth",
+    "convnext_base_22k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_base_22k_224.pth",
+    "convnext_large_22k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_large_22k_224.pth",
+    "convnext_xlarge_22k": f"{EVAL_CRAFTER_PATH}checkpoints/DOVER/convnext_xlarge_22k_224.pth",
 }
 
 def convnext_tiny(pretrained=False, in_22k=False, **kwargs):
@@ -654,7 +665,7 @@ def convnext_xlarge(pretrained=False, in_22k=False, **kwargs):
         model.load_state_dict(checkpoint["model"])
     return model
 
-def convnext_3d_tiny(pretrained=False, in_22k=False, **kwargs):
+def convnext_3d_tiny(pretrained=False, in_22k=True, **kwargs):
     print("Using Imagenet 22K pretrain", in_22k)
     model = ConvNeXt3D(depths=[3, 3, 9, 3], dims=[96, 192, 384, 768], **kwargs)
     if pretrained:
@@ -663,7 +674,7 @@ def convnext_3d_tiny(pretrained=False, in_22k=False, **kwargs):
         model.inflate_weights(checkpoint["model"])
     return model
 
-def convnext_3d_small(pretrained=False, in_22k=False, **kwargs):
+def convnext_3d_small(pretrained=False, in_22k=True, **kwargs):
     model = ConvNeXt3D(depths=[3, 3, 27, 3], dims=[96, 192, 384, 768], **kwargs)
     if pretrained:
         local_path = model_urls['convnext_small_22k'] if in_22k else model_urls['convnext_small_1k']

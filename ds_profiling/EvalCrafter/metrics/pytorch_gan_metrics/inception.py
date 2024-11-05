@@ -9,6 +9,15 @@ import torchvision
 from torchvision import models
 from torch.hub import load_state_dict_from_url
 
+EVAL_CRAFTER_PATH = None
+
+import builtins
+
+if hasattr(builtins, "EVAL_CRAFTER_PATH_"):
+    EVAL_CRAFTER_PATH = builtins.EVAL_CRAFTER_PATH_
+else:
+    assert EVAL_CRAFTER_PATH is not None, "Please specify EVAL_CRAFTER_PATH!"
+
 # Inception weights ported to Pytorch from
 # http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
 FID_WEIGHTS_URL = ('https://github.com/w86763777/pytorch-gan-metrics/releases/'
@@ -217,7 +226,7 @@ def fid_inception_v3():
     inception.Mixed_7b = FIDInceptionE_1(1280)
     inception.Mixed_7c = FIDInceptionE_2(2048)
 
-    local_path = '../checkpoints/pt_inception-2015-12-05-6726825d.pth'
+    local_path = f'{EVAL_CRAFTER_PATH}checkpoints/pt_inception-2015-12-05-6726825d.pth'
     checkpoint = torch.load(local_path, map_location="cpu")
     inception.load_state_dict(checkpoint)
     # state_dict = load_state_dict_from_url(FID_WEIGHTS_URL, progress=True)

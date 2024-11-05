@@ -10,21 +10,21 @@ import yaml
 from tqdm import tqdm
 import ipdb
 
-from dover.datasets import (
+from .dover.datasets import (
     UnifiedFrameSampler,
     ViewDecompositionDataset,
     spatial_temporal_view_decomposition,
 )
-from dover.models import DOVER
+from .dover.models import DOVER
 
 mean, std = (
     torch.FloatTensor([123.675, 116.28, 103.53]),
     torch.FloatTensor([58.395, 57.12, 57.375]),
 )
 
-aesthetic_sum = 0
-technical_sum = 0
-overall_sum = 0
+# aesthetic_sum = 0
+# technical_sum = 0
+# overall_sum = 0
 
 
 def fuse_results(results: list):
@@ -43,41 +43,43 @@ def fuse_results(results: list):
     }
 
 
+def compute_video_quality_scores(input_path, output_path_root, evalcrafter_path, gpu_id):
+    # parser.add_argument("-o", "--opt", type=str, default="./dover.yml", help="the option file")
+    # parser.add_argument("--dir_videos", type=str, default='', help="Specify the path of generated videos")    
+    # parser.add_argument("-d", "--device", type=str, default="cuda", help="the running device")
+    # parser.add_argument("--task", type=str, default=None, help="results saving path")
+    # args = parser.parse_args()
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--opt", type=str, default="./dover.yml", help="the option file")
-    parser.add_argument("--dir_videos", type=str, default='', help="Specify the path of generated videos")    
-    parser.add_argument("-d", "--device", type=str, default="cuda", help="the running device")
-    parser.add_argument("--task", type=str, default=None, help="results saving path")
-    args = parser.parse_args()
-
-    dir_videos = args.dir_videos
-    out_path = f'../../results/dover.csv'
+    # dir_videos = args.dir_videos
+    os.makedirs(output_path_root, exist_ok=True)
+    out_path = os.path.join(output_path_root, "dover.csv")
+    dover_path = os.path.join(evalcrafter_path, "metrics", "DOVER")
+    opt_file_path = os.path.join(dover_path, "dover.yml")
+    test_load_path = os.path.join(evalcrafter_path, "checkpoints/DOVER/pretrained_weights/DOVER.pth")
     
-    with open(args.opt, "r") as f:
+    with open(opt_file_path, "r") as f:
         opt = yaml.safe_load(f)
-
+    
     ### Load DOVER
-    evaluator = DOVER(**opt["model"]["args"]).to(args.device)
+    device = f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu"
+    evaluator = DOVER(**opt["model"]["args"]).to(device)
     evaluator.load_state_dict(
-        torch.load(opt["test_load_path"], map_location=args.device)
+        torch.load(test_load_path, map_location=device)
     )
 
     video_paths = []
     all_results = {}
 
     # Delete the log file if it exists
-    if os.path.exists(out_path):
-        os.remove(out_path)
+    # if os.path.exists(out_path):
+    #     os.remove(out_path)
     with open(out_path, "w") as w:
         w.write(f"path, aesthetic score, technical score, overall/final score\n")
 
     dopt = opt["data"]["val-l1080p"]["args"]
 
     dopt["anno_file"] = None
-    dopt["data_prefix"] = dir_videos
+    dopt["data_prefix"] = input_path
 
     dataset = ViewDecompositionDataset(dopt)
 
@@ -87,7 +89,7 @@ if __name__ == "__main__":
 
     try:
         with open(
-            f"dover_predictions/val-custom_{dir_videos.split('/')[-1]}.pkl",
+            f"dover_predictions/val-custom_{input_path.split('/')[-1]}.pkl",
             "rb",
         ) as rf:
             all_results = pkl.dump(all_results, rf)
@@ -95,8 +97,10 @@ if __name__ == "__main__":
     except:
         print("Starting over.")
 
-    sample_types = ["aesthetic", "technical"]
-
+    sample_types = ["aesthetic", "technical"]  #  
+    aesthetic_sum = 0
+    technical_sum = 0
+    overall_sum = 0
     for i, data in enumerate(tqdm(dataloader, desc="Testing")):
         if len(data.keys()) == 1:
             ##  failed data
@@ -105,7 +109,7 @@ if __name__ == "__main__":
         video = {}
         for key in sample_types:
             if key in data:
-                video[key] = data[key].to(args.device)
+                video[key] = data[key].to(device)
                 b, c, t, h, w = video[key].shape
                 video[key] = (
                     video[key]
@@ -124,20 +128,33 @@ if __name__ == "__main__":
 
         rescaled_results = fuse_results(results)
 
-        with open("zero_shot_res_sensehdr.txt","a") as wf:
-            wf.write(f'{data["name"][0].split("/")[-1]},{rescaled_results["aesthetic"]*100:4f}, {rescaled_results["technical"]*100:4f},{rescaled_results["overall"]*100:4f}\n')
+        zero_shot_out_file_path = os.path.join(output_path_root, "zero_shot_res_sensehdr.txt")
+        with open(zero_shot_out_file_path,"a") as wf:
+            wf.write(
+                     f'{data["name"][0].split("/")[-1]}, '
+                     + f'{rescaled_results["aesthetic"]*100:4f}, '
+                     + f'{rescaled_results["technical"]*100:4f}, '
+                     + f'{rescaled_results["overall"]*100:4f}\n'
+            )
 
         with open(out_path, "a") as w:
             w.write(
-                f'{data["name"][0].split("/")[-1].split(".")[0]}, {rescaled_results["aesthetic"]*100:4f}, {rescaled_results["technical"]*100:4f},{rescaled_results["overall"]*100:4f}\n'
+                f'{data["name"][0].split("/")[-1].split(".")[0]}, '
+                + f'{rescaled_results["aesthetic"]*100:4f}, '
+                + f'{rescaled_results["technical"]*100:4f}, '
+                + f'{rescaled_results["overall"]*100:4f}\n'
             )
-        aesthetic_sum+=rescaled_results["aesthetic"]*100
-        technical_sum+=rescaled_results["technical"]*100
-        overall_sum+=rescaled_results["overall"]*100
+        
+        aesthetic_sum += rescaled_results["aesthetic"] * 100
+        technical_sum += rescaled_results["technical"] * 100
+        overall_sum += rescaled_results["overall"] * 100
 
     
     with open(out_path, "a") as w:
             w.write(
-                f'Avg. scores: {aesthetic_sum/len(dataloader)}, {technical_sum/len(dataloader)},{overall_sum/len(dataloader)}\n'
+                f'Avg. scores:,'
+                + f'{aesthetic_sum/len(dataloader)}, '
+                + f'{technical_sum/len(dataloader)}, '
+                + f'{overall_sum/len(dataloader)}\n'
             )
 

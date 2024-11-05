@@ -39,3 +39,6 @@ flash-attn==2.6.3
 decord==0.6.0
 gradio==5.4.0
 pyyaml==6.0.2
+ipdb==0.13.13
+scikit-video==1.1.11
+open_clip_torch==2.29.0

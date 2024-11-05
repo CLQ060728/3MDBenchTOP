@@ -11,7 +11,8 @@ def get_args_parser():
     parser.add_argument('--functionality', default="", type=str, required=True,
         help="""Choose the functionality to use, which includes 'IMG_CAPTIONING', 'VIDEO_CAPTIONING', """
                 + """'PROMPT_GENERATION', 'IMG_GENERATION', 'VIDEO_GENERATION', """
-                + """'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'.""")
+                + """'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'. For videos: """
+                + """'VQA', 'IS', 'flow_score', 'warping_error'.""")
     parser.add_argument('--project_root', default="./", type=str, required=True,
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
@@ -58,13 +59,13 @@ def get_args_parser():
         help="""Profiling based on colour images/frames or gray-level images/frames, False - gray.""")
     parser.add_argument('--full_band', default=False, type=bool, 
            help="""Profiling based on full images/frames bands.""")
-    parser.add_argument('--real_or_fake', default=False, type=bool, 
-           help="""Profiling based on real or fake images/frames.""")
+    # parser.add_argument('--real_or_fake', default=False, type=bool, 
+           # help="""Profiling based on real or fake images/frames.""")
     parser.add_argument('--total_amount', default=80000, type=int, 
                         help="""Specify the total amount of profiling image/video files.""")
     parser.add_argument('--task_amount', default=1000, type=int, 
                         help="""Specify the amount of profiling image/video files per task.""")
-    parser.add_argument('--output_path', default="./", type=str,
+    parser.add_argument('--output_path', default="./output/", type=str,
                         help="""Specify the output path for profilings.""")
     # parser.add_argument('--tau', default=0.996, type=float, help="""BYOL moving average parameter.""")
     # parser.add_argument('--out_sizes', nargs='+', type=int, 
@@ -201,6 +202,21 @@ def main(args_main):
                                                          fake_descriptors_dict[descr_dict_key], 
                                                          descriptor_name, real_generator_name, 
                                                          fake_generator_name, channel, out_path)
+    elif args_main.functionality == "VQA" or args_main.functionality == "IS" or \
+         args_main.functionality == "flow_score" or args_main.functionality == "warping_error":
+        import ds_profiling.vid_ds_eval as vde
+        if args_main.real_path != "":
+            vid_set_name = f"{args_main.dataset_name}_real"
+            data_path = args_main.real_path
+        elif args_main.fake_path != "":
+            vid_set_name = f"{args_main.dataset_name}_fake"
+            data_path = args_main.fake_path
+        else:
+            raise ValueError('Please either specify real_path or fake_path!')
+        
+        output_path_root = os.path.join(args_main.output_path, vid_set_name)
+        vde.run_evalcrafter_metrics(args_main.project_root, data_path, args_main.functionality,
+                                    args_main.gpu_id, vid_set_name, output_path_root)
 
 
 if __name__ == '__main__':

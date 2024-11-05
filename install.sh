@@ -5,4 +5,24 @@ pip install --upgrade -r requirements.txt
 pip install --upgrade ./ds_processors/video_generators/OpenSora1_2/colossalai/
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./ds_processors/video_generators/OpenSora1_2/apex/
 pip install --upgrade ./ds_processors/prompt_processors/PLLaVA/moviepy/
+wget "https://github.com/w86763777/pytorch-gan-metrics/releases/download/v0.1.0/pt_inception-2015-12-05-6726825d.pth" --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/
+mkdir -p ./ds_profiling/EvalCrafter/checkpoints/DOVER/pretrained_weights/
+wget https://github.com/QualityAssessment/DOVER/releases/download/v0.1.0/DOVER.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/pretrained_weights/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_tiny_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_small_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_base_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_large_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_tiny_22k_224.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_small_22k_224.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_base_22k_224.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_large_22k_224.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+wget https://dl.fbaipublicfiles.com/convnext/convnext_xlarge_22k_224.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
+mkdir ./ds_profiling/EvalCrafter/checkpoints/RAFT/
+wget https://dl.dropboxusercontent.com/s/4j4z58wuv8o0mfz/models.zip --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/RAFT/
+unzip ./ds_profiling/EvalCrafter/checkpoints/RAFT/models.zip -d ./ds_profiling/EvalCrafter/checkpoints/RAFT/
+wget https://huggingface.co/RaphaelLiu/EvalCrafter-Models/resolve/main/FlowNet2_checkpoint.pth.tar --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/
+pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/channelnorm_package/
+pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/correlation_package/
+pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/resample2d_package/
+pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/alt_cuda_corr/
 pip cache purge

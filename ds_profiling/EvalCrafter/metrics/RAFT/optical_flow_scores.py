@@ -1,5 +1,5 @@
-import sys
-sys.path.append('core')
+# import sys
+# sys.path.append('core')
 
 import argparse
 import os
@@ -20,11 +20,11 @@ from tqdm import tqdm
 import argparse
 import ipdb
 
-from raft import RAFT
-from utils import flow_viz
-from utils.utils import InputPadder
+from .core.raft import RAFT
+from .core.utils import flow_viz
+from .core.utils.utils import InputPadder
 
-import warp_utils
+from . import warp_utils
 import ipdb
 import torch.nn.functional as F
 
@@ -41,7 +41,7 @@ def viz(img, flo, output_dir, img_count):
     output_filename = os.path.join(output_dir, f'output_{img_count:04d}.png')
     cv2.imwrite(output_filename, img_flo[:, :, [2, 1, 0]])
 
-def calculate_flow_score(video_path, model):
+def calculate_flow_score(video_path, model, device):
     
     # Create an output directory
     # output_dir = "output"
@@ -149,8 +149,7 @@ def calculate_motion_ac_score(video_path, amp, model):
     return amp_recognition_score
 
 # Adapted from https://github.com/phoenix104104/fast_blind_video_consistency
-def compute_video_warping_error(video_path, model):
-
+def compute_video_warping_error(video_path, model, device):
     cap = cv2.VideoCapture(video_path)
     frames = []
     warping_error = 0
@@ -234,53 +233,58 @@ def read_text_file(file_path):
         return f.read().strip()
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dir_videos", type=str, default='', help="Specify the path of generated videos")
-    parser.add_argument("--metric", type=str, default='celebrity_id_score', help="Specify the metric to be used")
-    parser.add_argument('--model', type=str, default='../../checkpoints/RAFT/models/raft-things.pth',help="restore checkpoint")
-    parser.add_argument('--path', help="dataset for evaluation")
-    parser.add_argument('--small', action='store_true', help='use small model')
-    parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
-    parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
-    args = parser.parse_args()
+def compute_optical_flow_scores(data_path, metric_name, gpu_id,
+                                evalcrafter_path, output_path_root):
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--dir_videos", type=str, default='', help="Specify the path of generated videos")
+    # parser.add_argument("--metric", type=str, default='celebrity_id_score', help="Specify the metric to be used")
+    # parser.add_argument('--model', type=str, default='../../checkpoints/RAFT/models/raft-things.pth',help="restore checkpoint")
+    # parser.add_argument('--path', help="dataset for evaluation")
+    # parser.add_argument('--small', action='store_true', help='use small model')
+    # parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
+    # parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
+    # args = parser.parse_args()
 
-    dir_videos = args.dir_videos
-    metric = args.metric
-
-    dir_prompts =  '../../prompts/'
-   
+    dir_videos = data_path
+    metric = metric_name
+    model_path = f"{evalcrafter_path}checkpoints/RAFT/models/raft-things.pth"
+    # dir_prompts =  os.path.join(data_path, "generated")
+    
     video_paths = [os.path.join(dir_videos, x) for x in os.listdir(dir_videos)]
-    prompt_paths = [os.path.join(dir_prompts, os.path.splitext(os.path.basename(x))[0]+'.txt') for x in video_paths]
+    # prompt_paths = [os.path.join(dir_prompts, os.path.splitext(os.path.basename(x))[0]+'.txt') for x in video_paths]
 
      # Create the directory if it doesn't exist
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    os.makedirs(f"../../results", exist_ok=True)
+    # timestamp = time.strftime("%Y%m%d-%H%M%S")
+    output_path = os.path.join(output_path_root, f"{metric}")
+    os.makedirs(output_path, exist_ok=True)
     # Set up logging
-    log_file_path = f"../../results/{metric}_record.txt"
-    # Delete the log file if it exists
-    if os.path.exists(log_file_path):
-        os.remove(log_file_path)
-    # Set up logging
-    logger = logging.getLogger()
+    # log_file_path = f"../../results/{metric}_record.txt"
+    # # Delete the log file if it exists
+    # if os.path.exists(log_file_path):
+    #     os.remove(log_file_path)
+    # # Set up logging
+    # logger = logging.getLogger()
+    # logger.setLevel(logging.INFO)
+    # # File handler for writing logs to a file
+    # file_handler = logging.FileHandler(filename=f"../../results/{metric}_record.txt")
+    # file_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    # logger.addHandler(file_handler)
+    # # Stream handler for displaying logs in the terminal
+    # stream_handler = logging.StreamHandler()
+    # stream_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    # logger.addHandler(stream_handler)
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    # File handler for writing logs to a file
-    file_handler = logging.FileHandler(filename=f"../../results/{metric}_record.txt")
-    file_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
-    logger.addHandler(file_handler)
-    # Stream handler for displaying logs in the terminal
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
-    logger.addHandler(stream_handler)
-
+    
     # Load pretrained models
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu"
     # clip_model = CLIPModel.from_pretrained("../../checkpoints/clip-vit-base-patch32").to(device)
     # clip_tokenizer = AutoTokenizer.from_pretrained("../../checkpoints/clip-vit-base-patch32")
     
     import json
     # Load the JSON data from the file
-    with open("../../metadata.json", "r") as infile:
+    with open(f"{evalcrafter_path}metadata.json", "r") as infile:
         data = json.load(infile)
     # Extract the dictionaries
     face_vid = {}
@@ -310,6 +314,9 @@ if __name__ == '__main__':
         if action:
             action_vid[item_key] = action
 
+    mixed_precision = True
+    small = False
+    alternate_corr = True
     if metric == 'action_recognition_score':
         # action_model 
         config = '../../metrics/mmaction2/configs/recognition/videomaev2/vit-base-p16_videomaev2-vit-g-dist-k710-pre_16x4x1_kinetics-400.py'
@@ -320,31 +327,31 @@ if __name__ == '__main__':
         # get the videos' basenames list action_vid  for recognition
         
     elif metric == 'motion_ac_score':
-        model = torch.nn.DataParallel(RAFT(args))
-        model.load_state_dict(torch.load(args.model))
+        model = torch.nn.DataParallel(RAFT(mixed_precision, small, alternate_corr))
+        model.load_state_dict(torch.load(model_path))
 
         model = model.module
         model.to(device)
         model.eval()
-        model.args.mixed_precision = False
+        model.mixed_precision = False
 
     elif metric == 'flow_score':
-        model = torch.nn.DataParallel(RAFT(args))
-        model.load_state_dict(torch.load(args.model))
+        model = torch.nn.DataParallel(RAFT(mixed_precision, small, alternate_corr))
+        model.load_state_dict(torch.load(model_path))
 
         model = model.module
         model.to(device)
         model.eval()
-        model.args.mixed_precision = False
+        model.mixed_precision = False
     
     elif metric == 'warping_error':
-        model = torch.nn.DataParallel(RAFT(args))
-        model.load_state_dict(torch.load(args.model))
+        model = torch.nn.DataParallel(RAFT(mixed_precision, small, alternate_corr))
+        model.load_state_dict(torch.load(model_path))
 
         model = model.module
         model.to(device)
         model.eval()
-        model.args.mixed_precision = False
+        model.mixed_precision = False
 
 
     # Calculate SD scores for all video-text pairs
@@ -353,13 +360,16 @@ if __name__ == '__main__':
     test_num = 10
     test_num = len(video_paths)
     count = 0
+    output_file_path = os.path.join(output_path, f"{metric}_results.txt")
     for i in tqdm(range(len(video_paths))):
         video_path = video_paths[i]
-        prompt_path = prompt_paths[i]
+        # prompt_path = prompt_paths[i]
+        # prompt = prompt_list[i]
         if count == test_num:
             break
         else:
-            text = read_text_file(prompt_path)
+            # text = read_text_file(prompt_path)
+            # text = prompt
             if metric == 'motion_ac_score':
                 # get the videos' basenames list action_vid  for recognition
                 basename = os.path.basename(video_path)[:4]
@@ -370,18 +380,24 @@ if __name__ == '__main__':
             elif metric == 'flow_score':
                 # get the videos' basenames list action_vid  for recognition
                 # basename = os.path.basename(video_path)[:4]
-                score = calculate_flow_score(video_path, model)
+                score = calculate_flow_score(video_path, model, device)
 
             elif metric == 'warping_error':
                 # get the videos' basenames list action_vid  for recognition
                 basename = os.path.basename(video_path)[:4]
-                score = compute_video_warping_error(video_path, model)
+                score = compute_video_warping_error(video_path, model, device)
             if score is not None:
                 scores.append(score)
                 count+=1
                 # ipdb.set_trace()
                 average_score = sum(scores) / len(scores)
-                logger.info(f"Vid: {os.path.basename(video_path)},  Current {metric}: {score}, Current avg. {metric}: {average_score} ")
+                logger.info(f"Vid: {os.path.basename(video_path)}, "
+                            + f"Current {metric}: {score}, "
+                            + f"Current avg. {metric}: {average_score} ")
+                with open(output_file_path, "a") as output_file:
+                    output_file.write(f"Vid: {os.path.basename(video_path)}, "
+                                      + f"Current {metric}: {score}, "
+                                      + f"Current avg. {metric}: {average_score}\n")
                 # wandb.log({
                 #     f"Current {metric}": score,
                 #     f"Average {metric}": average_score,
@@ -389,4 +405,8 @@ if __name__ == '__main__':
             
     # Calculate the average SD score across all video-text pairs
     average_score = sum(scores) / len(scores)
+    
+    with open(output_file_path, "a") as output_file:
+        output_file.write(f"Final average {metric}: {average_score}, Total videos: {len(scores)}")
+    
     logger.info(f"Final average {metric}: {average_score}, Total videos: {len(scores)}")
