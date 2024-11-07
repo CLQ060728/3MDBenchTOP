@@ -28,20 +28,21 @@ def run(project_root, data_root, file_suffix, content_type):
         else:
             raw_out_file_path = os.path.join(data_root, "generated", f"raw_vid_caption_{file_suffix}.txt")
             para_out_file_path = os.path.join(data_root, "generated", f"para_vid_caption_{file_suffix}.txt")
-        with open(raw_out_file_path, "a") as raw_out_file, open(para_out_file_path, "a") as para_out_file:
-            model_id = os.path.join(project_root, "llama3/Meta-Llama-3-8B-Instruct")
-            counter = 1
-            for sel_key, sel_cap_list in selected_img_cap_dict.items():
-                cap_string = para.get_caption_string(sel_cap_list, "")
-                raw_img_caption_dict[sel_key] = []
-                for raw_img_prefix in raw_img_caption_prefixes:
-                    raw_img_caption_dict[sel_key].append(f"{raw_img_prefix}{cap_string}")
-                pipeline, terminators = para.get_paraphrase_pipeline(model_id)
-                para_captions = para.paraphrase_image_captions(pipeline, terminators, sel_cap_list, "",
-                                                               content_type)
-                para_img_caption_dict[sel_key] = para_captions
+        # with open(raw_out_file_path, "a") as raw_out_file, open(para_out_file_path, "a") as para_out_file:
+        model_id = os.path.join(project_root, "llama3/Meta-Llama-3-8B-Instruct")
+        counter = 1
+        for sel_key, sel_cap_list in selected_img_cap_dict.items():
+            cap_string = para.get_caption_string(sel_cap_list, "")
+            raw_img_caption_dict[sel_key] = []
+            for raw_img_prefix in raw_img_caption_prefixes:
+                raw_img_caption_dict[sel_key].append(f"{raw_img_prefix}{cap_string}")
+            pipeline, terminators = para.get_paraphrase_pipeline(model_id)
+            para_captions = para.paraphrase_image_captions(pipeline, terminators, sel_cap_list, "",
+                                                            content_type)
+            para_img_caption_dict[sel_key] = para_captions
 
-                if counter % 1000 == 0:
+            if counter % 1000 == 0:
+                with open(raw_out_file_path, "a") as raw_out_file, open(para_out_file_path, "a") as para_out_file:
                     json.dump(raw_img_caption_dict, raw_out_file, indent=4)
                     json.dump(para_img_caption_dict, para_out_file, indent=4)
                     raw_out_file.write(f"\n counter: {counter}\n")
@@ -54,9 +55,9 @@ def run(project_root, data_root, file_suffix, content_type):
                     os.fsync(raw_out_file.fileno())
                     os.fsync(para_out_file.fileno())
                     print(f"counter: {counter}")
-                counter += 1
+            counter += 1
     except IOError as e:
-        print (f"IO Error: {e.strerror}")
+        print (f"IO Error: {e}")
 
 
 if __name__ == "__main__":
