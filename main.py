@@ -1,19 +1,21 @@
 import argparse
 import os
 import torch
+import numpy as np
 import json
 from ds_processors.video_generators import video_gen_runner as vgr
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('3MDBench', add_help=False)
-    # parser.add_argument bool value, default must be False, even you make it to True, it is still False, when set in the command line, it's always True;
+    # parser.add_argument bool value, default must be False, even you make it to True, it is still False, when set in the command line, it's always True;  'surf_keypoints', """ + """'surf_matching', 'surf_descriptor'
     parser.add_argument('--functionality', default="", type=str, required=True,
         help="""Choose the functionality to use, which includes 'IMG_CAPTIONING', 'VIDEO_CAPTIONING', """
                 + """'PROMPT_GENERATION', 'IMG_GENERATION', 'VIDEO_GENERATION', """
                 + """'DCT', 'DFT', 'POWER', 'GLCM', 'TEXTURE_DESCRIPTORS'. For videos: """
-                + """'VQA', 'IS', 'flow_score', 'warping_error', 'peak_est', 'key_frames'.""")
-    parser.add_argument('--project_root', default="./", type=str, required=True,
+                + """'VQA', 'IS', 'flow_score', 'warping_error', 'peak_est', 'key_frames', """
+                + """'sift_keypoints', 'sift_matching', 'sift_descriptor'.""")
+    parser.add_argument('--project_root', default="./", type=str,
                         help="""Specify the root directory for 3MDBench project.""")
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
     parser.add_argument('--dataset_name', default="", type=str, required=True, 
@@ -234,6 +236,42 @@ def main(args_main):
             vkfe.compute_peak_est_key_frames(vid_file_path, output_path, args_main.diff_threshold)
         elif args_main.functionality == "key_frames":
             vkfe.compute_katna_key_frames(vid_file_path, output_path)
+    elif args_main.functionality.endswith("keypoints") or \
+         args_main.functionality.endswith("matching") or \
+         args_main.functionality.endswith("descriptor"):
+        descriptor_type = "sift" # args_main.functionality.split("_")[0]
+        print(f"descriptor type: {descriptor_type}")
+        if args_main.real_path == "" and args_main.fake_path == "":
+           raise ValueError(
+               'Please specify real_path, fake_path, or both (for image keypoints matching).')
+        elif args_main.real_path != "":
+            img_file_path = args_main.real_path
+        elif args_main.fake_path != "":
+            img_file_path = args_main.fake_path
+
+        file_full_name = img_file_path.split("/")[-1]
+        file_name = file_full_name[:file_full_name.index(".")]
+        print(f"file name: {file_name}")
+        output_path_root = os.path.join(args_main.output_path, args_main.dataset_name,
+                                        args_main.functionality)
+        os.makedirs(output_path_root, exist_ok = True)
+        import ds_profiling.img_descriptors as ides
+        if args_main.functionality.endswith("keypoints"):
+            output_file_path = os.path.join(output_path_root, f"{file_name}_keypoints.png")
+            ides.save_keypoints_annotated_img(img_file_path, output_file_path, descriptor_type)
+        elif args_main.functionality.endswith("descriptor"):
+            output_file_path = os.path.join(output_path_root, f"{file_name}_descriptor.txt")
+            if descriptor_type == "sift":
+                _, img_descriptor = ides.get_img_sift_descriptor(img_file_path)
+            else:
+                _, img_descriptor = ides.get_img_surf_descriptor(img_file_path)
+            np.savetxt(output_file_path, img_descriptor, encoding="utf-8")
+        else:
+            output_file_path = os.path.join(output_path_root, f"{file_name}_matching.png")
+            img1_file_path = args_main.real_path
+            img2_file_path = args_main.fake_path
+            ides.save_keypoints_matching_imgs(img1_file_path, img2_file_path,
+                                              output_file_path, descriptor_type)
     
 
 if __name__ == '__main__':
