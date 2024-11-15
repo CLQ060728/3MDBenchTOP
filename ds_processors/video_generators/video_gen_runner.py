@@ -170,6 +170,7 @@ def run(args_main):
                                       args_main.gen_model, args_main.dataset_name,
                                       args_main.prompt_type, args_main.resolution)
     os.makedirs(args_main.save_dir, exist_ok = True)
+    device = torch.device(f"cuda:{args_main.gpu_id}" if torch.cuda.is_available() else "cpu")
     
     if args_main.gen_model == "OpenSora1_2":
         import builtins
@@ -181,11 +182,61 @@ def run(args_main):
         from .OpenSora1_2.OpenSora.scripts import inference as infer
         prompts_index = 0
         for prompt in prompts_list:
-            print(f"Current prompt string: {prompt}")
+            # print(f"Current prompt index: {prompts_index}; Current prompt string: {prompt}")
             args_main.seed = np.random.randint(0, 100000, size=1).item()
             args_main.prompt = [prompt]
             args_main.sample_name = f"{prompt_keys[prompts_index]}"
             print(f"Current sample name: {args_main.sample_name};")
             cfg = merge_args(cfg, args_main)
             infer.run_opensora(cfg)
+            prompts_index += 1
+    elif args_main.gen_model == "CogVideoX":
+        from .CogVideoX import generator as gen
+        cache_dir = os.path.join(args_main.project_root, "ds_processors", "video_generators",
+                                 "CogVideoX", "cache")
+        os.makedirs(cache_dir, exist_ok = True)
+        prompts_index = 0
+        for prompt in prompts_list:
+            sample_name = f"{prompt_keys[prompts_index]}.mp4"
+            output_file_path = os.path.join(args_main.save_dir, sample_name)
+            print(f"Current sample name: {sample_name};")
+            pipe = gen.get_CogVideoX_pipeline(cache_dir, device)
+            gen.run_cogvideox(pipe, prompt, output_file_path)
+            prompts_index += 1
+    elif args_main.gen_model == "VideoCrafter":
+        import builtins
+        videocrafter_root = os.path.join(args_main.project_root, "ds_processors", "video_generators",
+                                         "VideoCrafter")
+        builtins.VIDEOCRAFTER_PATH_ = videocrafter_root
+        from .VideoCrafter.scripts.evaluation import inference as vc_infer
+        # args_main.ckpt_path = os.path.join(videocrafter_root, "cache")
+        # os.makedirs(args_main.ckpt_path, exist_ok = True)
+        args_main.mode = "base"
+        args_main.bs = 1
+        args_main.ddim_eta = 1.0
+        
+        if args_main.resolution == "512":
+            args_main.config = os.path.join(videocrafter_root, "configs/inference_t2v_512_v2.0.yaml")
+            args_main.ckpt_path = os.path.join(videocrafter_root, "cache", "VideoCrafter2", "model.ckpt")
+        elif args_main.resolution == "1024":
+            args_main.config = os.path.join(videocrafter_root, "configs/inference_t2v_1024_v1.0.yaml")
+            args_main.ckpt_path = os.path.join(videocrafter_root, "cache", "VideoCrafter1_1024", "model.ckpt")
+        # vc_args.savedir = args_main.save_dir
+        # vc_args.savefps = args_main.save_fps
+        # vc_args.frames = args_main.num_frames
+        # vc_args.fps = args_main.fps
+        args_main.unconditional_guidance_scale = 12.0
+        if args_main.resolution == "512":
+            args_main.gen_width = 512
+            args_main.gen_height = 320
+        elif args_main.resolution == "1024":
+            args_main.gen_width = 1024
+            args_main.gen_height = 576
+        args_main.num_sample = 1
+        prompts_index = 0
+        for prompt in prompts_list:
+            args_main.seed = np.random.randint(0, 100000, size=1).item()
+            args_main.prompt = prompt
+            args_main.sample_name = f"{prompt_keys[prompts_index]}"
+            vc_infer.run_inference(args_main, device)
             prompts_index += 1

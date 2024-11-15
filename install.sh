@@ -5,8 +5,8 @@ pip install --upgrade -r requirements.txt
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./ds_processors/video_generators/OpenSora1_2/apex/
 pip install --upgrade ./ds_processors/video_generators/OpenSora1_2/colossalai/
 pip install --upgrade ./ds_processors/prompt_processors/PLLaVA/moviepy/
-wget "https://github.com/w86763777/pytorch-gan-metrics/releases/download/v0.1.0/pt_inception-2015-12-05-6726825d.pth" --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/
 mkdir -p ./ds_profiling/EvalCrafter/checkpoints/DOVER/pretrained_weights/
+wget "https://github.com/w86763777/pytorch-gan-metrics/releases/download/v0.1.0/pt_inception-2015-12-05-6726825d.pth" --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/
 wget https://github.com/QualityAssessment/DOVER/releases/download/v0.1.0/DOVER.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/pretrained_weights/
 wget https://dl.fbaipublicfiles.com/convnext/convnext_tiny_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
 wget https://dl.fbaipublicfiles.com/convnext/convnext_small_1k_224_ema.pth --directory-prefix=./ds_profiling/EvalCrafter/checkpoints/DOVER/
@@ -25,4 +25,8 @@ pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/channelno
 pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/correlation_package/
 pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/networks/resample2d_package/
 pip install --upgrade ./ds_profiling/EvalCrafter/metrics/RAFT/alt_cuda_corr/
+mkdir -p ./ds_processors/video_generators/VideoCrafter/cache/VideoCrafter2.0/
+mkdir -p ./ds_processors/video_generators/VideoCrafter/cache/VideoCrafter1_1024/
+wget https://huggingface.co/VideoCrafter/VideoCrafter2/resolve/main/model.ckpt --directory-prefix=./ds_processors/video_generators/VideoCrafter/cache/VideoCrafter2.0/
+wget https://huggingface.co/VideoCrafter/Text2Video-1024/resolve/main/model.ckpt --directory-prefix=./ds_processors/video_generators/VideoCrafter/cache/VideoCrafter1_1024/
 pip cache purge

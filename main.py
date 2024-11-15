@@ -37,7 +37,7 @@ def get_args_parser():
     parser.add_argument('--gen_model', default="", type=str, 
                         help="""Specify the generation model for generation and profiling,"""
                         + """ i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF',"""
-                        + """'StableDiffusionXL', 'OpenSora1_2'.""")
+                        + """'StableDiffusionXL', 'OpenSora1_2', 'CogVideoX', 'VideoCrafter'.""")
     parser.add_argument('--prompt_type', default="raw_prompt", type=str, 
                         help="""Specify prompt type, 'raw_prompt', 'para_prompt', 'cap_prompt'.""")
     parser.add_argument('--gen_width', default=512, type=int,
