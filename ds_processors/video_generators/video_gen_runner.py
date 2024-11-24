@@ -7,6 +7,11 @@ from mmengine.config import Config
 import numpy as np
 
 
+def is_folder_empty(folder_path):
+    # Check if the folder is empty
+    return not any(os.scandir(folder_path))
+
+
 def get_opensora_args(parser):
     # model config
     # parser.add_argument("--sora_config_path", required=True, default=None,
@@ -239,4 +244,30 @@ def run(args_main):
             args_main.prompt = prompt
             args_main.sample_name = f"{prompt_keys[prompts_index]}"
             vc_infer.run_inference(args_main, device)
+            prompts_index += 1
+    elif args_main.gen_model == "PyramidFlow":
+        pyramidflow_root = os.path.join(args_main.project_root, "ds_processors", "video_generators",
+                                        "PyramidFlow")
+        cache_dir = os.path.join(pyramidflow_root, "cache")
+        code_dir = os.path.join(pyramidflow_root, "code")
+        os.makedirs(cache_dir, exist_ok = True)
+        assert args_main.resolution == "384p" or args_main.resolution == "768p", \
+          "PyramidFlow resolution can only be 384p or 768p"
+        
+        if is_folder_empty(cache_dir):
+            from huggingface_hub import snapshot_download
+            model_path = cache_dir
+            snapshot_download("rain1011/pyramid-flow-miniflux", local_dir=model_path,
+                              local_dir_use_symlinks=False, repo_type='model')
+        
+        import builtins
+        builtins.PYRAMIDFLOW_PATH_ = code_dir
+        from .PyramidFlow import generator as pfgen
+        model = pfgen.get_pyramid_flow_model(cache_dir, args_main.resolution, args_main.gpu_id)
+        prompts_index = 0
+        for prompt in prompts_list:
+            # args_main.seed = np.random.randint(0, 100000, size=1).item()
+            sample_name = f"{prompt_keys[prompts_index]}.mp4"
+            output_path = os.path.join(args_main.save_dir, sample_name)
+            pfgen.run_pyramidflow(model, prompt, args_main.resolution, output_path)
             prompts_index += 1
