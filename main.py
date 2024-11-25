@@ -20,7 +20,7 @@ def get_args_parser():
     parser.add_argument('--gpu_id', default=0, type=int, help="""Specify the gpu id.""")
     parser.add_argument('--dataset_name', default="", type=str, required=True, 
                         help="""Specify dataset name, i.e., 'MSCOCO', 'CC3M', 'VISUAL_GENOME', """
-                       + """'MSR-VTT', 'CelebV-Text'.""")
+                       + """ 'GEOSYNTH', 'MSR-VTT', 'CelebV-Text'.""")
     
     parser.add_argument('--aggregate', default=False, type=bool, 
            help="""Whether to combine the generated image captioning files (for image captioning).""")
@@ -37,7 +37,8 @@ def get_args_parser():
     parser.add_argument('--gen_model', default="", type=str, 
                         help="""Specify the generation model for generation and profiling,"""
                         + """ i.e., 'Kandinsky3', 'PixArt_Σ', 'StableDiffusion3', 'DeepFloydIF',"""
-                        + """'StableDiffusionXL', 'OpenSora1_2', 'CogVideoX', 'VideoCrafter', 'PyramidFlow'.""")
+                        + """ 'GeoSynth', 'StableDiffusionXL', 'OpenSora1_2', 'CogVideoX',"""      
+                        + """ 'VideoCrafter', 'PyramidFlow'.""")
     parser.add_argument('--prompt_type', default="raw_prompt", type=str, 
                         help="""Specify prompt type, 'raw_prompt', 'para_prompt', 'cap_prompt'.""")
     parser.add_argument('--gen_width', default=512, type=int,
@@ -117,9 +118,13 @@ def main(args_main):
         builtins.CODE_DIR_ROOT_ = code_dir_root
         import ds_processors.image_generators.img_gen_runner as igr
         device = torch.device(f'cuda:{args_main.gpu_id}' if torch.cuda.is_available() else 'cpu')
-        igr.run(args_main.project_root, args_main.dataset_name, args_main.gen_model, args_main.max_bound,
-                args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, args_main.gpu_id, 
-                t2i_or_i2i = args_main.text2image, manual_seed=args_main.manual_seed, seed=args_main.seed)
+        if args_main.gen_model == "GeoSynth":
+            igr.run_geo_synth(args_main.project_root, args_main.dataset_name, args_main.gen_model,
+                              args_main.gpu_id)
+        else:
+            igr.run(args_main.project_root, args_main.dataset_name, args_main.gen_model, args_main.max_bound,
+                    args_main.gen_width, args_main.gen_height, args_main.prompt_type, device, args_main.gpu_id, 
+                    t2i_or_i2i = args_main.text2image, manual_seed=args_main.manual_seed, seed=args_main.seed)
     elif args_main.functionality == "VIDEO_GENERATION":
         vgr.run(args_main)
     elif args_main.functionality == "DCT":

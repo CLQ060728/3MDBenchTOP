@@ -5,6 +5,7 @@ import torch
 import os
 import json
 from . import generation_script as gs
+from PIL import Image
 
 
 def run(project_root, ds_name, model_name, max_bound, img_width, img_height,
@@ -82,12 +83,38 @@ def run(project_root, ds_name, model_name, max_bound, img_width, img_height,
                               manual_seed=False, seed=None)
 
 
-if __name__ == "__main__":
-    img_path_root = "/home/jovyan/3MDBench/data/IMAGEs/"
-    ds_name = "MSCOCO"
-    ds_path = os.path.join(img_path_root, ds_name)
+def run_geo_synth(project_root, ds_name, model_name, gpu_id):
+    torch.cuda.set_device(gpu_id)
+    cache_dir = os.path.join(project_root, "ds_processors", "image_generators", model_name, "cache")
+    os.makedirs(cache_dir, exist_ok = True)
+    ds_root = os.path.join(project_root, "data/IMAGEs")
+    ds_path = os.path.join(ds_root, ds_name)
+    output_path = os.path.join(ds_root, "generated", model_name, ds_name)
+    os.makedirs(output_path, exist_ok = True)
+    prompt_file_path = os.path.join(ds_path, "prompt_with_location.json")
+    with open(prompt_file_path, "r") as prompt_file:
+        prompt_list = json.load(prompt_file)
     
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model_name = "Kandinsky3"
-    variant= "" # "fp16"
+    from .GeoSynth import generator as geogen
+    pipe = geogen.get_geosynth_model(cache_dir)
+    for prompt_dict in prompt_list:
+        osm_img_file_path = os.path.join(ds_path, prompt_dict["source"])
+        osm_img = Image.open(osm_img_file_path)
+        prompt = prompt_dict["prompt"]
+        out_file_full_name = prompt_dict["target"].split("/")[1]
+        # suffix_index = out_file_full_name.index(".")
+        # out_file_name = out_file_full_name[:suffix_index]
+        print(f"out_file_full_name: {out_file_full_name};")
+        output_file_path = os.path.join(output_path, out_file_full_name)
+        geogen.run_geosynth(pipe, prompt, osm_img, output_file_path)
+    
+    
+# if __name__ == "__main__":
+#     img_path_root = "/home/jovyan/3MDBench/data/IMAGEs/"
+#     ds_name = "MSCOCO"
+#     ds_path = os.path.join(img_path_root, ds_name)
+    
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     model_name = "Kandinsky3"
+#     variant= "" # "fp16"
     
