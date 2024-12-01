@@ -151,16 +151,17 @@ def get_prompt_list(prompt_type, prompt_root, max_bound):
     with open(prompt_file_path, "r") as prompt_file:
         prompt_dict = json.load(prompt_file)
 
-    prompt_dict_keys = list(prompt_dict.keys())
-    index_key_mapping = dict()
-    for prompt_key_index in range(len(list(prompt_dict.keys()))):
-        index_key_mapping[prompt_key_index] = prompt_dict_keys[prompt_key_index]
+    prompt_keys = list(prompt_dict.keys())
+    # index_key_mapping = dict()
+    # for prompt_key_index in range(len(list(prompt_dict.keys()))):
+    #     index_key_mapping[prompt_key_index] = prompt_dict_keys[prompt_key_index]
     
-    prompt_keys = []
+    # prompt_keys = [] prompt_key
     prompt_list = []
-    for prompt_key, prompt_val_list in prompt_dict.items():
-        sel_index = np.random.randint(0, len(prompt_val_list), size=1, dtype=int)
-        prompt_keys.append(index_key_mapping[sel_index[0]])
+    for _, prompt_val_list in prompt_dict.items():
+        index_list = [val for val in range(len(prompt_val_list))]
+        sel_index = np.random.choice(index_list, size=1, replace=False)
+        # prompt_keys.append(prompt_key)
         prompt_list.append(prompt_val_list[sel_index[0]])
     
     return prompt_keys, prompt_list
@@ -264,10 +265,13 @@ def run(args_main):
         builtins.PYRAMIDFLOW_PATH_ = code_dir
         from .PyramidFlow import generator as pfgen
         model = pfgen.get_pyramid_flow_model(cache_dir, args_main.resolution, args_main.gpu_id)
+        print(f"prompts_list length: {len(prompts_list)};")
+        print(f"prompt_keys length: {len(prompt_keys)}")
         prompts_index = 0
         for prompt in prompts_list:
             # args_main.seed = np.random.randint(0, 100000, size=1).item()
             sample_name = f"{prompt_keys[prompts_index]}.mp4"
+            print(f"prompts_index: {prompts_index}; sample_name: {sample_name}")
             output_path = os.path.join(args_main.save_dir, sample_name)
             pfgen.run_pyramidflow(model, prompt, args_main.resolution, output_path)
             prompts_index += 1
