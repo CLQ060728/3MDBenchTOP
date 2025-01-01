@@ -108,7 +108,7 @@ def main(args_main):
         if args_main.dataset_name in ["MSCOCO", "CC3M", "VISUAL_GENOME"]:
             content_type = "image"
             data_root = f"{args_main.project_root}data/IMAGEs/{args_main.dataset_name}/"
-        elif args_main.dataset_name in ["MSR-VTT", "CelebV-Text"]:
+        elif args_main.dataset_name in ["MSR-VTT", "ActivityNet", "CelebV-Text"]:
             content_type = "video"
             data_root = f"{args_main.project_root}data/VIDEOs/{args_main.dataset_name}/"
         pr.run(args_main.project_root, data_root, args_main.max_bound, content_type)
