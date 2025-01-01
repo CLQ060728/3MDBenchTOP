@@ -35,7 +35,7 @@ checkpoints/
 !**/CelebV-Text/cap_prompt/
 !**/CelebV-Text/para_prompt/
 !**/CelebV-Text/raw_prompt/
-
+GEOSYNTH/
 
 cache/
 logs/
